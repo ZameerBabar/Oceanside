@@ -33,7 +33,7 @@ export default function SeatingChartGame() {
               MASTERY
             </h2>
             <p className="text-xl text-white  max-w-2xl mx-auto leading-relaxed">
-              Master your restaurant's seating layout with this interactive training game
+              Master your restaurant seating layout with this interactive training game
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">

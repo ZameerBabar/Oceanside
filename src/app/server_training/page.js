@@ -131,7 +131,7 @@ export default function ServerTrainingPage() {
                     <div className="p-6 md:p-8 rounded-3xl shadow-xl text-white flex flex-col md:flex-row items-center justify-between" style={{ background: 'linear-gradient(135deg, #49a078, #a2cc8e)' }}>
                         <div className="text-left flex-grow mb-4 md:mb-0">
                             <h2 className="text-xl md:text-2xl font-semibold">Full Server Training</h2>
-                            <p className="text-gray-100 mt-1">The complete guide covering every step of Oceanside's service process.</p>
+                            <p className="text-gray-100 mt-1">The complete guide covering every step of Oceanside service process.</p>
 
                             {/* Progress Bar */}
                             <div className="mt-4 w-full max-w-md bg-white bg-opacity-30 rounded-full h-2.5">
