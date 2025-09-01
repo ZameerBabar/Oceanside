@@ -152,7 +152,7 @@ export default function BartenderTrainingPage() {
                                 Full {userRole} Training
                             </h2>
                             <p className="text-gray-100 mt-1">
-                                The complete guide covering every step of Oceanside's {userRole === 'Bartender' ? 'bartending' : 'service'} process.
+                               The complete guide covering every step of Oceanside&apos;s {userRole === 'Bartender' ? 'bartending' : 'service'} process.
                             </p>
 
                             {/* Progress Bar */}
