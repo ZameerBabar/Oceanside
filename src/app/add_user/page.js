@@ -24,7 +24,7 @@ const AddUserForm = () => {
     password: '',
     confirmPassword: '',
     age: '',
-    role: 'Host',
+    role: 'Manager',
   });
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
