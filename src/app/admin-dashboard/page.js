@@ -317,7 +317,7 @@ const DashboardPage = () => {
                 color: themeColors.cardBackground,
               }}
             >
-              <h2 className="text-3xl font-bold">Hello, Jacob!</h2>
+              <h2 className="text-3xl font-bold">Hello, Manager!</h2>
               <p className="text-lg mt-2 opacity-90">Welcome to Your Oceanside Portal</p>
             </div>
 
