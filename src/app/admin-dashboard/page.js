@@ -51,7 +51,7 @@ const DashboardPage = () => {
 
   const dashboardCards = [
     {
-      title: 'Manager Hub',
+      title: 'Manager Tools',
       description: 'Everything you need to thrive ... From training to daily updates, this is your central resource as a server.',
       icon: (
         <path
@@ -66,7 +66,7 @@ const DashboardPage = () => {
       },
     },
     {
-      title: 'AI Chat',
+      title: 'AI & Support',
       description: 'Ask anything, anytime. Your 24/7 Oceanside assistant — here to answer questions about policies, menu items, tasks, and more.',
       icon: (
         <path
@@ -96,7 +96,7 @@ const DashboardPage = () => {
       },
     },
     {
-      title: 'Hot Schedules',
+      title: 'Team Hubs',
       description: 'Check your schedule, request time off, and manage shift swaps—all in one place.',
       icon: (
         <path
@@ -126,7 +126,7 @@ const DashboardPage = () => {
       },
     },
     {
-      title: 'Users Record',
+      title: 'Admin Tools',
       description: "See what’s fresh. Browse our latest specials, seasonal dishes, and featured items.",
       icon: (
         <path

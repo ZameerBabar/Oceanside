@@ -30,7 +30,7 @@ const AddUserForm = () => {
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
 
   // Array of roles for the dropdown menu
-  const roles = ['Host', 'Server', 'Busser', 'Bartender', 'Dishwasher', 'Cook'];
+  const roles = ['Manager','Host', 'Server', 'Busser', 'Bartender', 'Dishwasher', 'Cook'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
