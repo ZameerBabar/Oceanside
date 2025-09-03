@@ -80,21 +80,7 @@ const DashboardPage = () => {
         router.push('/ai_chat');
       },
     },
-    {
-      title: 'Employee Manual',
-      description: "Know what's expected. Access company policies, protocols, and essential FOH information in one place.",
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 6.253v13"
-        />
-      ),
-      onClick: () => {
-        router.push('/employee_manual');
-      },
-    },
+   
     {
       title: 'Team Hubs',
       description: 'Check your schedule, request time off, and manage shift swaps—all in one place.',
@@ -110,21 +96,7 @@ const DashboardPage = () => {
         router.push('/training_screen');
       },
     },
-    {
-      title: 'Add User',
-      description: 'Never miss a beat. Stay informed with real-time team updates and important alerts.',
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M8 12h8m-4 4h4"
-        />
-      ),
-      onClick: () => {
-        router.push('/add_user');
-      },
-    },
+  
     {
       title: 'Admin Tools',
       description: "See what’s fresh. Browse our latest specials, seasonal dishes, and featured items.",
