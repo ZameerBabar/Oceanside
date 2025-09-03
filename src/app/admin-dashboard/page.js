@@ -140,36 +140,7 @@ const DashboardPage = () => {
         router.push('/employee_manual');
       },
     },
-    {
-      title: 'Events',
-      description: 'Never miss a beat. Stay informed with real-time team updates and important alerts.',
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M8 12h8m-4 4h4"
-        />
-      ),
-      onClick: () => {
-        router.push('/upload_data');
-      },
-    },
-    {
-      title: 'Menu Features',
-      description: "See what’s fresh. Browse our latest specials, seasonal dishes, and featured items.",
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 6.253v13"
-        />
-      ),
-      onClick: () => {
-        router.push('/employee_manual');
-      },
-    },
+    
   ];
 
   return (
