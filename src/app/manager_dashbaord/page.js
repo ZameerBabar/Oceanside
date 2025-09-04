@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { ChevronDown, BarChart2, Star, Download, Share2, Printer, RefreshCw, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -9,10 +9,15 @@ const FirebaseReviewReport = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('Flagler');
+  const [availableMonths, setAvailableMonths] = useState([]);
 
   const fetchDataFromFirebase = async (month) => {
+    if (!month) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       setError('');
@@ -36,8 +41,35 @@ const FirebaseReviewReport = () => {
     }
   };
 
+  const fetchAvailableMonths = async () => {
+    try {
+      const collectionRef = collection(db, 'reviewReports');
+      const querySnapshot = await getDocs(collectionRef);
+      const months = [];
+      querySnapshot.forEach(doc => {
+        months.push(doc.id);
+      });
+      months.sort().reverse(); // Sort to get the most recent first
+      setAvailableMonths(months);
+      if (months.length > 0) {
+        setSelectedMonth(months[0]);
+      } else {
+        setError("No data available in Firestore for any month.");
+      }
+    } catch (error) {
+      console.error("Error fetching available months:", error);
+      setError("Failed to fetch available months from Firestore.");
+    }
+  };
+
   useEffect(() => {
-    fetchDataFromFirebase(selectedMonth);
+    fetchAvailableMonths();
+  }, []);
+
+  useEffect(() => {
+    if (selectedMonth) {
+      fetchDataFromFirebase(selectedMonth);
+    }
   }, [selectedMonth]);
 
   const getRatingStars = (rating) => {
@@ -81,17 +113,10 @@ const FirebaseReviewReport = () => {
     </div>
   );
 
-  const generateMonthOptions = () => {
-    const options = [];
-    const currentDate = new Date();
-    
-    for (let i = 0; i < 12; i++) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const monthValue = date.toISOString().slice(0, 7);
-      const monthName = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-      options.push({ value: monthValue, label: monthName });
-    }
-    return options;
+  const formatMonthLabel = (monthValue) => {
+    const [year, month] = monthValue.split('-');
+    const date = new Date(year, month - 1, 1);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
   };
 
   const filteredRatings = data?.ratings?.filter(rating => {
@@ -184,14 +209,18 @@ const FirebaseReviewReport = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#d4edc9] to-[#34916aff]">
         <div className="bg-white rounded-xl p-8 shadow-lg text-center space-y-4 max-w-md">
           <div className="text-red-500 text-lg font-semibold">{error}</div>
-          <p className="text-gray-600">Please try selecting a different month or upload data first.</p>
-          <button 
-            onClick={() => fetchDataFromFirebase(selectedMonth)}
-            className="bg-[#34916aff] text-white px-6 py-3 rounded-lg hover:bg-[#2d7a5a] transition-colors flex items-center space-x-2 mx-auto"
+          <p className="text-gray-600">Please select another month to view data.</p>
+          <select 
+            value={selectedMonth} 
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg border border-gray-300 shadow-sm transition-colors hover:bg-gray-200"
           >
-            <RefreshCw size={18} />
-            <span>Retry</span>
-          </button>
+            {availableMonths.map((month) => (
+              <option key={month} value={month} className="text-gray-800">
+                {formatMonthLabel(month)}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
     );
@@ -219,18 +248,15 @@ const FirebaseReviewReport = () => {
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="bg-white/20 text-white px-4 py-2 rounded-full border border-white/30 backdrop-blur-sm"
             >
-              {generateMonthOptions().map((option) => (
-                <option key={option.value} value={option.value} className="text-gray-800">
-                  {option.label}
+              {availableMonths.map((month) => (
+                <option key={month} value={month} className="text-gray-800">
+                  {formatMonthLabel(month)}
                 </option>
               ))}
             </select>
           </div>
           <div className="flex flex-wrap items-center space-x-2 space-y-2 md:space-y-0 mt-4 md:mt-0">
-            <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full flex items-center transition-colors hover:bg-gray-200">
-              <ChevronDown size={18} className="mr-2" /> 
-              {new Date(selectedMonth + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-            </button>
+           
             <button className="bg-[#1E4D2B] text-white px-4 py-2 rounded-full flex items-center transition-transform transform hover:scale-105">
               <Download size={18} className="mr-2" /> Download
             </button>
@@ -282,11 +308,11 @@ const FirebaseReviewReport = () => {
               >
                 <option value="Flagler">Flagler</option>
                 <option value="Ormond">Ormond</option>
-                <option value="Side-by-Side">Comparison</option>
+                <option value="Comparison">Comparison</option>
               </select>
             }
           >
-            {selectedLocation === 'Side-by-Side' ? (
+            {selectedLocation === 'Comparison' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h4 className="text-lg font-bold mb-4 text-[#1E4D2B]">Flagler</h4>

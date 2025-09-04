@@ -67,7 +67,7 @@ const DashboardPage = () => {
       gradient: 'from-purple-500 to-purple-600',
       shadowColor: 'shadow-purple-200',
       onClick: () => {
-        router.push('/ai_chat');
+        router.push('/ai_and_support');
       },
     },
     
