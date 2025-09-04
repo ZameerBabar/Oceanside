@@ -70,7 +70,7 @@ const DashboardPage = () => {
         router.push('/ai_chat');
       },
     },
-   
+    
     {
       title: 'Team Hubs',
       description: 'Check your schedule, request time off, and manage shift swaps—all in one place.',
@@ -101,7 +101,7 @@ const DashboardPage = () => {
         />
       ),
       gradient: 'from-orange-500 to-red-500',
-      shadowColor: 'shadow-orange-200',
+      shadowColor: 'shadow-green-200',
       onClick: () => {
         router.push('/employee_manual');
       },
@@ -116,8 +116,8 @@ const DashboardPage = () => {
       }}
     >
       {/* Mobile Header (visible on small screens) */}
-      <div className="md:hidden w-full flex justify-between items-center p-4 shadow-xl fixed top-0 left-0 z-50 backdrop-blur-lg" 
-        style={{ backgroundColor: `${themeColors.darkGreen}` }}>
+      <div className="md:hidden w-full flex justify-between items-center p-6 shadow-xl fixed top-0 left-0 z-50 backdrop-blur-lg" 
+      style={{ backgroundColor: `${themeColors.darkGreen}` }}>
         <img
           src="/logo.png"
           alt="Oceanside Logo"
@@ -129,37 +129,37 @@ const DashboardPage = () => {
       </div>
 
       {/* Desktop Sidebar (hidden on small screens) */}
-      <div className="hidden md:flex flex-col w-72 p-8 text-white shadow-2xl backdrop-blur-lg" style={{
+      <div className="hidden md:flex flex-col w-52 p-4 text-white shadow-2xl backdrop-blur-lg" style={{
         background: `linear-gradient(145deg, ${themeColors.darkGreen}, ${themeColors.lightGreen})`,
         borderRight: `1px solid ${themeColors.lightGreen}`,
       }}>
-        <div className="flex items-center justify-center mb-12 mt-4">
+        <div className="flex items-center justify-center mb-6 mt-2">
           
             <img
               src="/logo.png"
               alt="Oceanside Logo"
-              className="h-16 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
-         
+          
         </div>
-        <nav className="space-y-4 flex-grow">
-          <div className="flex items-center p-3 rounded-2xl bg-gradient-to-r from-[#34916aff] to-green-600 backdrop-blur-lg shadow-lg border border-white">
-            <span className="mr-4 bg-white/20 p-2 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+        <nav className="space-y-3 flex-grow">
+          <div className="flex items-center p-2 rounded-2xl bg-gradient-to-r from-[#34916aff] to-green-600 backdrop-blur-lg shadow-lg border border-white">
+            <span className="mr-3 bg-white/20 p-1.5 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
             </span>
-            <span className="font-bold text-xl text-white">Dashboard</span>
+            <span className="font-bold text-lg text-white">Dashboard</span>
           </div>
         </nav>
         {/* Logout Button */}
         <nav className="space-y-1 mt-auto">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full p-1 rounded-2xl transition-all duration-300 bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="flex items-center w-full p-2 rounded-2xl transition-all duration-300 border border-red text-white font-bold hover:bg-red/20 hover:shadow-xl transform hover:scale-105"
           >
-            <span className="mr-4 bg-white/20 p-2 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <span className="mr-3 bg-white/20 p-1.5 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-2 0V4H5v12h12v-2a1 1 0 112 0v3a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm9.293 8.293a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L13 13.414V17a1 1 0 11-2 0v-3.586l-1.293 1.293a1 1 0 01-1.414-1.414l3-3z" clipRule="evenodd" />
               </svg>
             </span>
@@ -170,36 +170,36 @@ const DashboardPage = () => {
 
       {/* Mobile Menu (opens on small screens) */}
       <div className={`fixed inset-0 z-40 bg-gray-900/80 backdrop-blur-sm md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMobileMenuOpen(false)}></div>
-      <div className={`fixed top-0 left-0 h-full w-72 z-50 flex flex-col p-8 text-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden backdrop-blur-lg ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{
+      <div className={`fixed top-0 left-0 h-full w-60 z-50 flex flex-col p-4 text-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden backdrop-blur-lg ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{
         background: `linear-gradient(145deg, ${themeColors.darkGreen}, ${themeColors.lightGreen})`,
       }}>
-        <div  className="flex items-center justify-center mb-12 mt-4">
-         
+        <div   className="flex items-center justify-center mb-8 mt-2">
+          
             <img
               src="/logo.png"
               alt="Oceanside Logo"
-              className="h-16 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
-         
+          
         </div>
         <nav className="space-y-2 flex-grow">
           <div className="flex items-center p-2 rounded-2xl bg-green/20 backdrop-blur-lg shadow-lg border border-white/30">
-            <span className="mr-4 bg-white/20 p-2 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <span className="mr-3 bg-white/20 p-1.5 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
             </span>
-            <span className="font-bold text-xl text-white">Dashboard</span>
+            <span className="font-bold text-lg text-white">Dashboard</span>
           </div>
         </nav>
         {/* Logout Button */}
         <nav className="space-y-1 mt-auto">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full p-2 rounded-2xl transition-all duration-300 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="flex items-center w-full p-2 rounded-2xl transition-all duration-300 border border-white text-white font-bold hover:bg-white/20 hover:shadow-xl transform hover:scale-105"
           >
-            <span className="mr-4 bg-white/20 p-2 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <span className="mr-3 bg-white/20 p-1.5 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-2 0V4H5v12h12v-2a1 1 0 112 0v3a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm9.293 8.293a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L13 13.414V17a1 1 0 11-2 0v-3.586l-1.293 1.293a1 1 0 01-1.414-1.414l3-3z" clipRule="evenodd" />
               </svg>
             </span>
@@ -209,52 +209,52 @@ const DashboardPage = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-6 md:p-10 overflow-y-auto mt-20 md:mt-0">
+      <div className="flex-1 p-4 md:p-6 overflow-y-hidden mt-20 md:mt-0">
         {/* Greeting Card */}
         <div
-          className="flex flex-col p-8 rounded-3xl mb-12 shadow-2xl border backdrop-blur-lg"
+          className="flex flex-col p-7 rounded-3xl mb-6 shadow-2xl border backdrop-blur-lg"
           style={{
             background: `linear-gradient(135deg, ${themeColors.darkGreen}, #38c755dd)`,
             color: themeColors.cardBackground,
             borderColor: `${themeColors.lightGreen}`,
           }}
         >
-          <div className="flex items-center mb-4">
-            <div className="bg-white/20 p-3 rounded-2xl mr-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="flex items-center mb-2">
+            <div className="bg-white/20 p-3 rounded-2xl mr-3">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
               </svg>
             </div>
             <div>
-              <h2 className="text-4xl font-bold">Hello, Manager!</h2>
-              <p className="text-xl mt-2 opacity-90">Welcome to Your Oceanside Manager Portal</p>
+              <h2 className="text-2xl font-bold">Hello Manager!</h2>
+              <p className="text-base mt-1 opacity-90">Welcome to Your Oceanside Manager Portal</p>
             </div>
           </div>
         </div>
 
         {/* Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-1">
           {dashboardCards.map((card, index) => (
             <div
               key={index}
               onClick={card.onClick}
-              className={`bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl p-8 flex items-start cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border border-white/50 ${card.shadowColor} hover:${card.shadowColor}/50`}
+              className={`bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl p-9 flex items-start cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border border-white/50 ${card.shadowColor} hover:${card.shadowColor}/50`}
             >
-              <div className={`p-4 rounded-2xl mr-6 bg-gradient-to-br ${card.gradient} shadow-lg`}>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className={`p-4 rounded-2xl mr-4 bg-gradient-to-br ${card.gradient} shadow-lg`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   {card.icon}
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold mb-3" style={{ color: themeColors.darkGreen }}>
+                <h3 className="text-lg font-bold mb-1.5" style={{ color: themeColors.darkGreen }}>
                   {card.title}
                 </h3>
-                <p className="text-base leading-relaxed" style={{ color: themeColors.textLight }}>
+                <p className="text-xs leading-relaxed" style={{ color: themeColors.textLight }}>
                   {card.description}
                 </p>
-                <div className="mt-4 flex items-center text-sm font-semibold" style={{ color: themeColors.darkGreen }}>
+                <div className="mt-2 flex items-center text-xs font-semibold" style={{ color: themeColors.darkGreen }}>
                   <span>Explore</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
