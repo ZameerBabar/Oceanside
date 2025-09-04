@@ -50,7 +50,7 @@ const DashboardPage = () => {
       gradient: 'from-blue-500 to-blue-600',
       shadowColor: 'shadow-blue-200',
       onClick: () => {
-        router.push('/training_screen');
+        router.push('/manager_tool_page');
       },
     },
     {
@@ -227,7 +227,7 @@ const DashboardPage = () => {
             </div>
             <div>
               <h2 className="text-2xl font-bold">Hello Manager!</h2>
-              <p className="text-base mt-1 opacity-90">Welcome to Your Oceanside Manager Portal</p>
+              <p className="text-base mt-1 opacity-90">Welcome to Your Oceanside Manager Portal.<br></br> Use this dashboard to oversee your team, access recources, and manage day-to-day operations.</p>
             </div>
           </div>
         </div>
