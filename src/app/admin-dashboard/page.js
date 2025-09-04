@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-import ManagerDashboardPage from '../manager_dashbaord/page'; // Sahi kiya gaya import path
 
 const themeColors = {
   darkGreen: '#34916aff',
@@ -15,24 +14,11 @@ const themeColors = {
 };
 
 // ==========================================================
-// New Component for Review Report Page
-// ==========================================================
-const ReviewReportPage = () => {
-  return (
-    <div className="bg-white rounded-3xl p-8 shadow-md" style={{ border: `1px solid ${themeColors.lightGreen}` }}>
-      <h2 className="text-2xl font-bold" style={{ color: themeColors.darkGreen }}>Review Report</h2>
-      <p className="mt-2 text-gray-600">This is the Review Report page content. Here you can display tables, charts, and other report-related information.</p>
-    </div>
-  );
-};
-
-// ==========================================================
 // Web Dashboard Component
 // ==========================================================
 const DashboardPage = () => {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeView, setActiveView] = useState('dashboard');
 
   const handleLogout = async () => {
     try {
@@ -58,9 +44,11 @@ const DashboardPage = () => {
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M3 10h18M3 14h18m-9-4v4m0 0v4m0-4h4m-4 0H7"
+          d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
         />
       ),
+      gradient: 'from-blue-500 to-blue-600',
+      shadowColor: 'shadow-blue-200',
       onClick: () => {
         router.push('/training_screen');
       },
@@ -72,10 +60,12 @@ const DashboardPage = () => {
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          strokeWidth={2}
-          d="M8 12h8m-4 4h4"
+          strokeWidth={1}
+          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
         />
       ),
+      gradient: 'from-purple-500 to-purple-600',
+      shadowColor: 'shadow-purple-200',
       onClick: () => {
         router.push('/ai_chat');
       },
@@ -89,9 +79,11 @@ const DashboardPage = () => {
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M3 10h18M3 14h18m-9-4v4m0 0v4m0-4h4m-4 0H7"
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
         />
       ),
+      gradient: 'from-green-500 to-emerald-600',
+      shadowColor: 'shadow-green-200',
       onClick: () => {
         router.push('/training_screen');
       },
@@ -99,20 +91,21 @@ const DashboardPage = () => {
   
     {
       title: 'Admin Tools',
-      description: "See what’s fresh. Browse our latest specials, seasonal dishes, and featured items.",
+      description: "See what's fresh. Browse our latest specials, seasonal dishes, and featured items.",
       icon: (
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M12 6.253v13"
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
         />
       ),
+      gradient: 'from-orange-500 to-red-500',
+      shadowColor: 'shadow-orange-200',
       onClick: () => {
         router.push('/employee_manual');
       },
     },
-    
   ];
 
   return (
@@ -123,63 +116,50 @@ const DashboardPage = () => {
       }}
     >
       {/* Mobile Header (visible on small screens) */}
-      <div className="md:hidden w-full flex justify-between items-center p-4 shadow-lg fixed top-0 left-0 z-50" 
-        style={{ backgroundColor: themeColors.darkGreen }}>
+      <div className="md:hidden w-full flex justify-between items-center p-4 shadow-xl fixed top-0 left-0 z-50 backdrop-blur-lg" 
+        style={{ backgroundColor: `${themeColors.darkGreen}` }}>
         <img
           src="/logo.png"
           alt="Oceanside Logo"
-          className="h-8 w-auto object-contain"
+          className="h-10 w-auto object-contain"
         />
-        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-md">
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-lg bg-white/20 backdrop-blur">
           <MenuIcon />
         </button>
       </div>
 
       {/* Desktop Sidebar (hidden on small screens) */}
-      <div className="hidden md:flex flex-col w-64 p-6 text-white shadow-lg" style={{
-        background: `linear-gradient(105deg, ${themeColors.lightGreen}, #34916aff)`,
+      <div className="hidden md:flex flex-col w-72 p-8 text-white shadow-2xl backdrop-blur-lg" style={{
+        background: `linear-gradient(145deg, ${themeColors.darkGreen}, ${themeColors.lightGreen})`,
+        borderRight: `1px solid ${themeColors.lightGreen}`,
       }}>
-        <div className="flex items-center justify-center mb-10 mt-4">
-          <img
-            src="/logo.png"
-            alt="Oceanside Logo"
-            className="h-12 w-auto object-contain"
-          />
+        <div className="flex items-center justify-center mb-12 mt-4">
+          
+            <img
+              src="/logo.png"
+              alt="Oceanside Logo"
+              className="h-16 w-auto object-contain"
+            />
+         
         </div>
-        <nav className="space-y-2 flex-grow">
-          <a
-            href="#"
-            onClick={() => setActiveView('dashboard')}
-            className={`flex items-center p-3 rounded-xl transition-colors duration-200 ${activeView === 'dashboard' ? 'bg-green-800' : 'hover:bg-green-700'}`}
-          >
-            <span className="mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <nav className="space-y-4 flex-grow">
+          <div className="flex items-center p-3 rounded-2xl bg-gradient-to-r from-[#34916aff] to-green-600 backdrop-blur-lg shadow-lg border border-white">
+            <span className="mr-4 bg-white/20 p-2 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
             </span>
-            <span className="font-semibold text-white">Dashboard</span>
-          </a>
-          {/* New "Review Report" button */}
-          <button
-            onClick={() => setActiveView('managerDashboard')}
-            className={`flex items-center w-full p-3 rounded-xl transition-colors duration-200 ${activeView === 'managerDashboard' ? 'bg-green-800' : 'hover:bg-green-700'}`}
-          >
-            <span className="mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M9 19V6.253a1 1 0 00-1.447-.894L.493 8.369A1 1 0 000 9.253v8.5a1 1 0 001 1h8a1 1 0 001-1zm6-6v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 001 1h5a1 1 0 001-1zm-4-4a1 1 0 001-1V5a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 001 1zm-2-2a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2z" />
-              </svg>
-            </span>
-            <span className="font-semibold text-white">Review Report</span>
-          </button>
+            <span className="font-bold text-xl text-white">Dashboard</span>
+          </div>
         </nav>
         {/* Logout Button */}
         <nav className="space-y-1 mt-auto">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full p-3 rounded-xl transition-colors duration-200 bg-green-500 hover:bg-red-700 text-white font-semibold"
+            className="flex items-center w-full p-1 rounded-2xl transition-all duration-300 bg-gradient-to-r from-red-500 to-red-400 hover:from-red-600 hover:to-red-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            <span className="mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <span className="mr-4 bg-white/20 p-2 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-2 0V4H5v12h12v-2a1 1 0 112 0v3a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm9.293 8.293a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L13 13.414V17a1 1 0 11-2 0v-3.586l-1.293 1.293a1 1 0 01-1.414-1.414l3-3z" clipRule="evenodd" />
               </svg>
             </span>
@@ -189,57 +169,37 @@ const DashboardPage = () => {
       </div>
 
       {/* Mobile Menu (opens on small screens) */}
-      <div className={`fixed inset-0 z-40 bg-gray-900 bg-opacity-75 md:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMobileMenuOpen(false)}></div>
-      <div className={`fixed top-0 left-0 h-full w-64 z-50 flex flex-col p-6 text-white shadow-lg transition-transform duration-300 ease-in-out md:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{
-        background: `linear-gradient(105deg, ${themeColors.lightGreen}, #34916aff)`,
+      <div className={`fixed inset-0 z-40 bg-gray-900/80 backdrop-blur-sm md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMobileMenuOpen(false)}></div>
+      <div className={`fixed top-0 left-0 h-full w-72 z-50 flex flex-col p-8 text-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden backdrop-blur-lg ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{
+        background: `linear-gradient(145deg, ${themeColors.darkGreen}, ${themeColors.lightGreen})`,
       }}>
-        <div className="flex items-center justify-center mb-10 mt-4">
-          <img
-            src="/logo.png"
-            alt="Oceanside Logo"
-            className="h-12 w-auto object-contain"
-          />
+        <div  className="flex items-center justify-center mb-12 mt-4">
+         
+            <img
+              src="/logo.png"
+              alt="Oceanside Logo"
+              className="h-16 w-auto object-contain"
+            />
+         
         </div>
         <nav className="space-y-2 flex-grow">
-          <a
-            href="#"
-            onClick={() => {
-              setActiveView('dashboard');
-              setIsMobileMenuOpen(false);
-            }}
-            className={`flex items-center p-3 rounded-xl transition-colors duration-200 ${activeView === 'dashboard' ? 'bg-green-800' : 'hover:bg-green-700'}`}
-          >
-            <span className="mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <div className="flex items-center p-2 rounded-2xl bg-green/20 backdrop-blur-lg shadow-lg border border-white/30">
+            <span className="mr-4 bg-white/20 p-2 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
             </span>
-            <span className="font-semibold text-white">Dashboard</span>
-          </a>
-          {/* New "Review Report" button */}
-          <button
-            onClick={() => {
-              setActiveView('managerDashboard');
-              setIsMobileMenuOpen(false);
-            }}
-            className={`flex items-center w-full p-3 rounded-xl transition-colors duration-200 ${activeView === 'managerDashboard' ? 'bg-green-800' : 'hover:bg-green-700'}`}
-          >
-            <span className="mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M9 19V6.253a1 1 0 00-1.447-.894L.493 8.369A1 1 0 000 9.253v8.5a1 1 0 001 1h8a1 1 0 001-1zm6-6v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 001 1h5a1 1 0 001-1zm-4-4a1 1 0 001-1V5a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 001 1zm-2-2a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1h2a1 1 0 001-1v-2z" />
-              </svg>
-            </span>
-            <span className="font-semibold text-white">Review Report</span>
-          </button>
+            <span className="font-bold text-xl text-white">Dashboard</span>
+          </div>
         </nav>
         {/* Logout Button */}
         <nav className="space-y-1 mt-auto">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full p-3 rounded-xl transition-colors duration-200 bg-green-500 hover:bg-red-700 text-white font-semibold"
+            className="flex items-center w-full p-2 rounded-2xl transition-all duration-300 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            <span className="mr-3">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <span className="mr-4 bg-white/20 p-2 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-2 0V4H5v12h12v-2a1 1 0 112 0v3a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm9.293 8.293a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L13 13.414V17a1 1 0 11-2 0v-3.586l-1.293 1.293a1 1 0 01-1.414-1.414l3-3z" clipRule="evenodd" />
               </svg>
             </span>
@@ -249,51 +209,59 @@ const DashboardPage = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-4 md:p-8 overflow-y-auto mt-16 md:mt-0">
-        {activeView === 'dashboard' && (
-          <>
-            {/* Greeting Card */}
-            <div
-              className="flex flex-col p-6 rounded-3xl mb-8 shadow-md"
-              style={{
-                background: 'linear-gradient(135deg, #34916aff, #38c755ff)',
-                color: themeColors.cardBackground,
-              }}
-            >
-              <h2 className="text-3xl font-bold">Hello, Manager!</h2>
-              <p className="text-lg mt-2 opacity-90">Welcome to Your Oceanside Manager Portal</p>
+      <div className="flex-1 p-6 md:p-10 overflow-y-auto mt-20 md:mt-0">
+        {/* Greeting Card */}
+        <div
+          className="flex flex-col p-8 rounded-3xl mb-12 shadow-2xl border backdrop-blur-lg"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.darkGreen}, #38c755dd)`,
+            color: themeColors.cardBackground,
+            borderColor: `${themeColors.lightGreen}`,
+          }}
+        >
+          <div className="flex items-center mb-4">
+            <div className="bg-white/20 p-3 rounded-2xl mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+              </svg>
             </div>
+            <div>
+              <h2 className="text-4xl font-bold">Hello, Manager!</h2>
+              <p className="text-xl mt-2 opacity-90">Welcome to Your Oceanside Manager Portal</p>
+            </div>
+          </div>
+        </div>
 
-            {/* Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 md:p-3">
-              {dashboardCards.map((card, index) => (
-                <div
-                  key={index}
-                  onClick={card.onClick}
-                  className="bg-white rounded-3xl shadow-md p-6 flex items-start cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-                  style={{ border: `1px solid ${themeColors.lightGreen}` }}
-                >
-                  <span className="p-3 rounded-full mr-4" style={{ backgroundColor: themeColors.lightGreen }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke={themeColors.darkGreen}>
-                      {card.icon}
-                    </svg>
-                  </span>
-                  <div>
-                    <h3 className="text-xl font-bold mb-1" style={{ color: themeColors.darkGreen }}>
-                      {card.title}
-                    </h3>
-                    <p className="text-sm" style={{ color: themeColors.textLight }}>
-                      {card.description}
-                    </p>
-                  </div>
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-2">
+          {dashboardCards.map((card, index) => (
+            <div
+              key={index}
+              onClick={card.onClick}
+              className={`bg-white/95 backdrop-blur-lg rounded-3xl shadow-xl p-8 flex items-start cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-2xl border border-white/50 ${card.shadowColor} hover:${card.shadowColor}/50`}
+            >
+              <div className={`p-4 rounded-2xl mr-6 bg-gradient-to-br ${card.gradient} shadow-lg`}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {card.icon}
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold mb-3" style={{ color: themeColors.darkGreen }}>
+                  {card.title}
+                </h3>
+                <p className="text-base leading-relaxed" style={{ color: themeColors.textLight }}>
+                  {card.description}
+                </p>
+                <div className="mt-4 flex items-center text-sm font-semibold" style={{ color: themeColors.darkGreen }}>
+                  <span>Explore</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
-              ))}
+              </div>
             </div>
-          </>
-        )}
-        
-        {activeView === 'reviewReport' && <ReviewReportPage />}
-        {activeView === 'managerDashboard' && <ManagerDashboardPage />}
+          ))}
+        </div>
       </div>
     </div>
   );
