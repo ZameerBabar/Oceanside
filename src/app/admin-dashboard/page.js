@@ -85,7 +85,7 @@ const DashboardPage = () => {
       gradient: 'from-green-500 to-emerald-600',
       shadowColor: 'shadow-green-200',
       onClick: () => {
-        router.push('/training_screen');
+        router.push('/team_hubs');
       },
     },
   
@@ -103,7 +103,7 @@ const DashboardPage = () => {
       gradient: 'from-orange-500 to-red-500',
       shadowColor: 'shadow-green-200',
       onClick: () => {
-        router.push('/employee_manual');
+        router.push('/admin_tool');
       },
     },
   ];
