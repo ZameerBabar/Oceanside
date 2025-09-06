@@ -4,11 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-// Firestore services ko bhi import karein.
+// Firebase
 import { auth, db } from './firebaseConfig'; 
 import { onAuthStateChanged, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from 'firebase/firestore';
-
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,73 +15,71 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // useEffect hook jo user ki authentication state ko monitor karega.
-  // Ab yeh user role ke mutabiq sahi dashboard par redirect karega.
+  // ✅ Auth state check
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User signed in hai. Ab role ke hisab se redirect karein.
-        if (user.email === 'manager@gmail.com') {
-          // Agar manager hai, to admin dashboard par bhej dein.
-          router.push('/admin-dashboard');
-        } else {
-          // Agar employee hai, to simple dashboard par bhej dein.
-          // Note: Abhi hum sirf email check kar rahe hain, lekin
-          // agar aapko future mein alag-alag employee roles ke liye
-          // alag dashboard chahiye, to aap Firestore se user ka role
-          // fetch kar sakte hain, jaise ke neeche comment mein bataya gaya hai.
+        try {
+          // 🔹 Step 1: Managers collection check
+          const managerRef = doc(db, 'managers', user.uid);
+          const managerSnap = await getDoc(managerRef);
 
-          /*
+          if (managerSnap.exists()) {
+            router.push('/admin-dashboard');
+            return;
+          }
+
+          // 🔹 Step 2: Users collection check
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const userRole = userData.role;
-            if (userRole === 'Host') {
-              router.push('/host-dashboard');
-            } else if (userRole === 'Bartender') {
-              router.push('/bartender-dashboard');
-            }
-          }
-          */
 
-          router.push('/dashboard');
+          if (userSnap.exists()) {
+            router.push('/dashboard');
+            return;
+          }
+
+          // ❌ Not found
+          setError('User role not found. Please contact admin.');
+        } catch (err) {
+          console.error("Role check error:", err);
+          setError("Something went wrong. Please try again.");
         }
-      } else {
-        // Koi user signed in nahi hai, ab login form dikha sakte hain.
-        setLoading(false);
       }
+      setCheckingAuth(false);
     });
 
-    // Cleanup function: jab component unmount hoga to listener ko remove kar dega.
     return () => unsubscribe();
   }, [router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Purana error saaf kar dein
+    setError('');
+    setLoading(true);
 
-      try {
-      // Firebase ke function ka istemal karke login ki koshish karein.
+    try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Agar login successful ho gaya, to useEffect hook ki wajah se role-based redirect ho jayega.
+      // ✅ Redirect handled in useEffect
     } catch (err) {
-      // Login mein error hone par yahan handle karein.
-      // Error message ko user-friendly banayein.
-      if (err.code === 'auth/invalid-email' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setError('Ghalat email ya password. Dobara koshish karein.');
-      } else {
-        setError('Login karne mein koi masla hua. Dobara koshish karein.');
-      }
       console.error(err);
+      if (
+        err.code === 'auth/invalid-email' ||
+        err.code === 'auth/wrong-password' ||
+        err.code === 'auth/user-not-found' ||
+        err.code === 'auth/invalid-credential'
+      ) {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError('Login failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-
-  // Jab tak authentication state check ho rahi hai, loading screen dikhayen.
-  if (loading) {
+  if (checkingAuth) {
     return (
       <div className="flex h-screen w-screen items-center justify-center font-sans">
         <div className="text-xl font-bold text-gray-700">Loading...</div>
@@ -92,7 +89,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex h-screen w-screen font-sans">
-      {/* 🔹 Left Panel with Background Image */}
+      {/* 🔹 Left Panel */}
       <div 
         className="relative w-1/2 h-full flex flex-col items-center justify-center text-white text-center"
         style={{ 
@@ -101,21 +98,13 @@ export default function LoginPage() {
           backgroundPosition: 'center',
         }}
       >
-        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black opacity-60 z-0"></div>
-
-        {/* Text Content */}
         <div className="relative z-10 flex flex-col items-center text-center px-4">
           <Image src="/logo.png" alt="Oceanside Logo" width={150} height={75} className="mb-2" />
-          <br />
-          
           <h1 className="text-4xl md:text-5xl mb-4 leading-tight">
             Welcome to <br /> Oceanside <br /> Training Portal
           </h1>
-          <br />
           <p className="text-lg mb-3">Empowering every shift with knowledge</p>
-          <br />
-          <br />
           <p className="text-sm">For FOH, BOH, and Management Staff</p>
         </div>
       </div>
@@ -130,11 +119,15 @@ export default function LoginPage() {
             <Image src="/logo.png" alt="Oceanside Logo" width={120} height={60} />
           </div>
 
-          <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">Sign in to your account</h2>
+          <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+            Sign in to your account
+          </h2>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">Email</label>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Email
+              </label>
               <div className="relative">
                 <input
                   type="email"
@@ -144,14 +137,14 @@ export default function LoginPage() {
                   required
                   className="w-full border-2 border-gray-300 rounded-xl p-3 pl-12 focus:outline-none focus:ring-2 focus:ring-[#7CC242] transition-colors duration-200"
                 />
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  📧
-                </div>
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">📧</div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">Password</label>
+              <label className="block text-sm font-medium mb-1 text-gray-700">
+                Password
+              </label>
               <div className="relative">
                 <input
                   type="password"
@@ -161,9 +154,7 @@ export default function LoginPage() {
                   required
                   className="w-full border-2 border-gray-300 rounded-xl p-3 pl-12 focus:outline-none focus:ring-2 focus:ring-[#7CC242] transition-colors duration-200"
                 />
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  🔒
-                </div>
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">🔒</div>
               </div>
             </div>
 
@@ -171,9 +162,14 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full bg-[#49a078] text-white font-bold py-3 px-4 rounded-xl transition-transform duration-300 transform hover:scale-105 shadow-md"
+              disabled={loading}
+              className={`w-full font-bold py-3 px-4 rounded-xl transition-transform duration-300 transform hover:scale-105 shadow-md ${
+                loading
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-[#49a078] text-white'
+              }`}
             >
-              Login
+              {loading ? 'Loading...' : 'Login'}
             </button>
           </form>
 

@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
-// Sahi file path ka istemal karen: 'src/app/add_user/page.js' se 'src/firebaseConfig.js' tak
+// Firebase config se auth aur db import
 import { auth, db } from '../firebaseConfig';
 
 // Theme Colors
@@ -29,8 +29,8 @@ const AddUserForm = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
 
-  // Array of roles for the dropdown menu
-  const roles = ['Manager','Host', 'Server', 'Busser', 'Bartender', 'Dishwasher', 'Cook'];
+  // Roles dropdown
+  const roles = ['Manager', 'Host', 'Server', 'Busser', 'Bartender', 'Dishwasher', 'Cook'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +40,7 @@ const AddUserForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Form validation
+    // Validation
     if (formData.password !== formData.confirmPassword) {
       setMessage('Passwords do not match.');
       setMessageType('error');
@@ -51,14 +51,12 @@ const AddUserForm = () => {
       setMessageType('error');
       return;
     }
+
     setMessage('User create ho raha hai...');
     setMessageType('info');
 
     try {
-      // ----------------------------------------------
-      // Step 1: Firebase Authentication (Create User)
-      // `auth` object ko import karke seedhe istemal kar rahe hain
-      // ----------------------------------------------
+      // Step 1: Firebase Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -66,27 +64,28 @@ const AddUserForm = () => {
       );
       const user = userCredential.user;
 
-      // ----------------------------------------------
-      // Step 2: Store User Data in Firestore
-      // `db` object ko bhi import karke seedhe istemal kar rahe hain
-      // ----------------------------------------------
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, {
+      // Common user data
+      const userData = {
         name: formData.name,
         email: formData.email,
         age: parseInt(formData.age, 10),
         role: formData.role,
         createdAt: new Date(),
-      });
+      };
 
-      setMessage('User kamyabi se ban gaya hai aur aap dashboard pe redirect ho rahe hain!');
+      // Step 2: Store based on role
+      if (formData.role === 'Manager') {
+        const managerRef = doc(db, 'managers', user.uid);
+        await setDoc(managerRef, userData);
+      } else {
+        const userRef = doc(db, 'users', user.uid);
+        await setDoc(userRef, userData);
+      }
+
+      setMessage('User kamyabi se ban gaya hai! Redirect ho rahe hain...');
       setMessageType('success');
-      
-      // Redirect karne ke liye 3 second ka intezaar
-      // Asal application mein, aap router ka istemal karenge (maslan, react-router-dom)
-      setTimeout(() => {
-        window.location.href = '/admin-dashboard';
-      }, 3000);
+
+    
 
     } catch (error) {
       console.error("Error creating user and storing data:", error);
