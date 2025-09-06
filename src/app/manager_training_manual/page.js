@@ -13,7 +13,7 @@ const sections = [
     { title: "Labor & Scheduling", key: "laborAndScheduling" },
     { title: "People & Leadership", key: "peopleAndLeadership" },
     { title: "Guest Experience", key: "guestExperience" },
-    { title: "Menu & Product Knowledge", key: "menuAndProductKnowledge" },
+    { title: "Menu Knowledge", key: "menuAndProductKnowledge" },
     { title: "Sales & Reporting", key: "salesAndReporting" },
     { title: "Inventory & COGS", key: "inventoryAndCOGS" },
     { title: "Marketing & Events", key: "marketingAndEvents" },
@@ -41,9 +41,17 @@ const ContentDisplay = ({ content }) => {
                     case 'list':
                         return (
                             <ul key={index} className="list-disc list-inside ml-4">
-                                {item.list.map((listItem, listIndex) => (
-                                    <li key={listIndex}>{listItem}</li>
-                                ))}
+                                {item.list.map((listItem, listIndex) => {
+                                    if (typeof listItem === 'object' && listItem !== null) {
+                                        return (
+                                            <li key={listIndex}>
+                                                <span className="font-semibold">{listItem.title}:</span> {listItem.text}
+                                            </li>
+                                        );
+                                    } else {
+                                        return <li key={listIndex}>{listItem}</li>;
+                                    }
+                                })}
                             </ul>
                         );
                     case 'numberedList':
@@ -129,7 +137,7 @@ export default function ManagerTraining() {
             return;
         }
         try {
-            const userDocRef = doc(db, "users", user.uid);
+            const userDocRef = doc(db, "managers", user.uid);
             const acknowledgementData = {
                 fullName: fullName,
                 signatureData: signaturePadRef.current.toDataURL(),
@@ -230,8 +238,8 @@ export default function ManagerTraining() {
                                         disabled={isAcknowledged}
                                     />
                                     <label className="ml-2 block text-sm text-gray-700">
-                                     By signing this form, I confirm that I have received, reviewed, 
-                                    and agree to follow Oceanside’s Manager Training guidelines.</label>
+                                      By signing this form, I confirm that I have received, reviewed, 
+                                      and agree to follow Oceanside’s Manager Training guidelines.</label>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mt-2">
