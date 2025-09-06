@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation'; // ✅ import router
 import { ChevronRight, Users, BookOpen, FileText, Target, TrendingUp, Shield, Sparkles, Star } from 'lucide-react';
 
 const ModernCard = ({ 
@@ -134,10 +135,12 @@ const FloatingBadge = ({ children, delay = 0, position = 'top-right' }) => {
 };
 
 const ManagerHubScreen = () => {
+  const router = useRouter(); // ✅ fix
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Enhanced animated background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#34916aff]  to-[#d4edc9]">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#34916aff]  to-[#d4edc9]">
         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent" />
         
         {/* Floating background elements */}
@@ -160,7 +163,7 @@ const ManagerHubScreen = () => {
         <div className="w-full max-w-5xl">
           {/* Enhanced header */}
           <header className="text-center mb-16">
-            <div className="inline-block relative w-full, ">
+            <div className="inline-block relative w-full">
               {/* Background glow */}
               <div className="absolute inset-0 bg-white/20 rounded-2xl blur-xl scale-110" />
               
@@ -185,10 +188,11 @@ const ManagerHubScreen = () => {
                          guest experience, and all Oceanside training 
                          modules."
               icon={<BookOpen />}
-              onClick={() => {}}
+              onClick={() => {
+                router.push('/manager_training_manual'); // ✅ now works
+              }}
               iconBg="from-emerald-500 via-teal-500 to-cyan-600"
               image="https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop&crop=faces"
-            
             />
             
             <ModernCard className="md:w-[45%]"
@@ -197,9 +201,11 @@ const ManagerHubScreen = () => {
                          downloadable documents needed for daily 
                          operations."
               icon={<FileText />}
-              onClick={() => {}}
+              onClick={() => {
+                router.push('/manager_resources'); // ✅ add navigation
+              }}
               iconBg="from-violet-500 via-purple-500 to-indigo-600"
-             image="https://thumbor.forbes.com/thumbor/fit-in/900x510/https://www.forbes.com/advisor/wp-content/uploads/2022/09/What_Is_Human_Resources_-_article_image.jpg"
+              image="https://thumbor.forbes.com/thumbor/fit-in/900x510/https://www.forbes.com/advisor/wp-content/uploads/2022/09/What_Is_Human_Resources_-_article_image.jpg"
             />
           </div>
         </div>
