@@ -57,7 +57,7 @@ const AiSupportView = () => {
             title="Contact Book"
             description="Directory for suppliers, owners, contractors, and city contacts relevant to restaurant operations."
             icon={<Book />}
-            onClick={() => {}}
+             onClick={() => router.push('/contact_book')} 
             className="hover:shadow-blue-500/40 shadow-lg"
           />
         </div>

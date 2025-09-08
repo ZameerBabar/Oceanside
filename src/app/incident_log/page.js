@@ -14,7 +14,12 @@ const App = () => {
   const [newDescription, setNewDescription] = useState('');
   const [newReportedBy, setNewReportedBy] = useState('');
   const [newFollowUp, setNewFollowUp] = useState('');
-  const [editingIndex, setEditingIndex] = useState(null);
+
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingIncident, setEditingIncident] = useState(null);
+  const [statusEdit, setStatusEdit] = useState('');
+  const [followUpEdit, setFollowUpEdit] = useState('');
 
   const incidentTypes = ['Guest Complaint', 'Staff Injury', 'Maintenance'];
   const statusOptions = ['Open', 'In Progress', 'Closed'];
@@ -61,15 +66,22 @@ const App = () => {
   };
 
   // ================================
-  // Update Status
+  // Update Status + Follow-Up
   // ================================
-  const handleStatusChange = async (id, newStatus) => {
+  const handleUpdateIncident = async () => {
+    if (!editingIncident) return;
     try {
-      const incidentRef = doc(db, 'IncidentLog', id);
-      await updateDoc(incidentRef, { status: newStatus });
-      setEditingIndex(null);
+      const incidentRef = doc(db, 'IncidentLog', editingIncident.id);
+      await updateDoc(incidentRef, {
+        status: statusEdit,
+        followUp: followUpEdit
+      });
+      setEditModalOpen(false);
+      setEditingIncident(null);
+      setStatusEdit('');
+      setFollowUpEdit('');
     } catch (error) {
-      console.error('Error updating status: ', error);
+      console.error('Error updating incident: ', error);
     }
   };
 
@@ -88,7 +100,9 @@ const App = () => {
       <div className="bg-white rounded-3xl shadow-xl p-12 w-full max-w-screen-xl">
         <div className="mb-6">
           <h1 className="text-4xl font-bold text-green-700">Incident Log</h1>
-          <p className="mt-2 text-gray-600">Recod Guest Complaints, accidents and maintenance issues in real time for better reporting and accountability.</p>
+          <p className="mt-2 text-gray-600">
+            Record Guest Complaints, accidents and maintenance issues in real time for better reporting and accountability.
+          </p>
         </div>
 
         <button 
@@ -110,64 +124,30 @@ const App = () => {
               </tr>
             </thead>
             <tbody>
-              {incidents.map((incident, index) => (
+              {incidents.map((incident) => (
                 <tr key={incident.id} className="border-b border-gray-200 hover:bg-gray-50 transition">
                   <td className="py-3 px-4">{incident.date}</td>
                   <td className="py-3 px-4">{incident.type}</td>
 
-                  {/* ✅ FIXED DROPDOWN HERE */}
-                  <td className="py-3 px-4 relative overflow-visible">
+                  {/* ✅ Status + Edit Button */}
+                  <td className="py-3 px-4">
                     <div className="flex items-center space-x-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(incident.status)}`}>
                         {incident.status}
                       </span>
 
                       {incident.status !== 'Closed' && (
-                        <div className="relative">
-                          <svg
-                            onClick={() => setEditingIndex(editingIndex === index ? null : index)}
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 text-gray-500 cursor-pointer hover:text-green-600"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-
-                          {editingIndex === index && (
-                            <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
-                              {incident.status === 'Open' && (
-                                <>
-                                  <button
-                                    onClick={() => handleStatusChange(incident.id, 'In Progress')}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                  >
-                                    In Progress
-                                  </button>
-                                  <button
-                                    onClick={() => handleStatusChange(incident.id, 'Closed')}
-                                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                  >
-                                    Closed
-                                  </button>
-                                </>
-                              )}
-                              {incident.status === 'In Progress' && (
-                                <button
-                                  onClick={() => handleStatusChange(incident.id, 'Closed')}
-                                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                  Closed
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                        <button
+                          onClick={() => {
+                            setEditingIncident(incident);
+                            setStatusEdit(incident.status);
+                            setFollowUpEdit(incident.followUp || '');
+                            setEditModalOpen(true);
+                          }}
+                          className="text-gray-500 hover:text-green-600"
+                        >
+                          ✏️
+                        </button>
                       )}
                     </div>
                   </td>
@@ -182,7 +162,7 @@ const App = () => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal for New Incident */}
       {showForm && (
         <div className="fixed inset-0 bg-gradient-to-br from-[#34916aff] to-[#d4edc9] bg-opacity-40 flex justify-center items-center z-50">
           <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-xl">
@@ -209,6 +189,58 @@ const App = () => {
                 <button type="submit" className="px-6 py-3 bg-green-600 text-white rounded-xl">Add Incident</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Edit Incident */}
+      {editModalOpen && editingIncident && (
+        <div className="fixed inset-0 bg-gradient-to-br from-[#34916aff] to-[#d4edc9] bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Update Incident</h2>
+
+            {/* Status Options */}
+            <label className="block mb-2 font-medium">Status</label>
+            <select
+              value={statusEdit}
+              onChange={(e) => setStatusEdit(e.target.value)}
+              className="w-full border p-2 rounded mb-4"
+            >
+              {editingIncident.status === 'Open' && (
+                <>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Closed">Closed</option>
+                </>
+              )}
+              {editingIncident.status === 'In Progress' && (
+                <option value="Closed">Closed</option>
+              )}
+            </select>
+
+            {/* Follow-up Field */}
+            <label className="block mb-2 font-medium">Follow-up</label>
+            <textarea
+              rows="3"
+              value={followUpEdit}
+              onChange={(e) => setFollowUpEdit(e.target.value)}
+              placeholder="Enter follow-up details..."
+              className="w-full border p-2 rounded mb-4"
+            />
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setEditModalOpen(false)}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateIncident}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}

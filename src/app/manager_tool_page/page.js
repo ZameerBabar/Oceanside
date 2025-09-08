@@ -90,6 +90,9 @@ const ManagerToolsPage = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h.01M7 12h.01M7 15h.01M11 12h.01M11 15h.01M15 12h.01M15 15h.01M19 12h.01M19 15h.01M4 20h16a2 2 0 002-2V6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       ),
+       onClick: () => {
+        router.push('/live_calendar');
+      },
     },
     {
       title: 'Toast',
