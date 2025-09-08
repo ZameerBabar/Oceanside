@@ -149,7 +149,7 @@ const App = () => {
           </div>
         </div>
         
-        {/* Add Event button and View Toggle */}
+        {/* Add Event button and View Toggle button */}
         <div className="flex justify-between items-center mb-6 flex-wrap space-y-4 md:space-y-0">
           <button 
             onClick={() => setShowForm(true)}
