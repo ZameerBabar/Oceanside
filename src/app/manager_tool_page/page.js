@@ -65,7 +65,7 @@ const ManagerToolsPage = () => {
         </svg>
       ),
       onClick: () => {
-        router.push('/manager_task_board');
+        router.push('/manager_taskboard');
       },
     },
     {
