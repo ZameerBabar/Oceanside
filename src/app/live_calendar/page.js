@@ -144,7 +144,7 @@ const App = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-4xl font-bold text-green-800">Live Calendar</h1>
           <div className="text-right">
-            <p className="text-lg font-semibold text-gray-700">Today's Date</p>
+            <p className="text-lg font-semibold text-gray-700">Todays Date</p>
             <p className="text-sm text-gray-500">{today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
         </div>
