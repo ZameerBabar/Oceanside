@@ -100,6 +100,34 @@ export default function HubPage() {
     ]
   };
 
+
+const cookHubData = {
+    title: "Kitchen Hub",
+    description: "Your all-in-one resource for seating charts, training guides, and shift notes to keep the front of house running smoothly.",
+    cards: [
+      {
+        title: "Seating Chart",
+        description: "Understand table numbers, sections, and layout",
+        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Seating+Chart",
+        altText: "A seating chart diagram"
+      },
+      {
+        title: "Host/Hostess Training Manual",
+        description: "Learn key greeting, seating, and guest experience skills",
+        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Training+Manual",
+        altText: "A training manual"
+      },
+      {
+        title: "Shift Notes",
+        description: "View important updates for today's shift, including a specials, VIP guests, and any service changes",
+        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Shift+Notes",
+        altText: "A notebook with shift notes"
+      }
+    ]
+  };
+
+
+
   const bartenderHubData = {
     title: "Bartender Hub",
     description: "Your all-in-one resource for drink recipes, manuals, menu knowledge, and shift notes.",
@@ -139,6 +167,8 @@ export default function HubPage() {
     currentHubData = bartenderHubData;
   } else if (userRole === 'Server') {
     currentHubData = serverHubData;
+  } else if (userRole === 'Cook'){
+     currentHubData = cookHubData;
   }
 
   const handleCardClick = (cardTitle) => {

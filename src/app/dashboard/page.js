@@ -39,22 +39,9 @@ const hubs = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
     )
   },
-  'Busser': {
-    title: 'Busser Hub',
-    description: 'Learn reset procedures, cleanliness standards, sidework checklists, and the tools you need to keep service flowing.',
-    icon: (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.5 12h-15m0 0a2.25 2.25 0 01-2.25-2.25v-.5a2.25 2.25 0 012.25-2.25h15a2.25 2.25 0 012.25 2.25v.5a2.25 2.25 0 01-2.25 2.25zM4.5 12h15m-15 0l1.25 5.5a1.5 1.5 0 001.444 1.25h8.612a1.5 1.5 0 001.444-1.25l1.25-5.5m-15 0V4.5a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v1.5a.75.75 0 00.75.75h3a.75.75 0 00.75-.75v-1.5a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75V12" />
-    )
-  },
-  'Dishwasher': {
-    title: 'Dishwasher Hub',
-    description: 'Find cleaning procedures, dish station setup, closing checklists, and everything you need to keep the kitchen running smoothly.',
-    icon: (
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.25 6.75h-1.5a.75.75 0 01-.75-.75v-.75a.75.75 0 00-.75-.75H12a.75.75 0 00-.75.75v.75a.75.75 0 01-.75.75H3.75m16.5 0v3.75m-16.5-3.75v3.75m16.5 0h-3.75m-12.75 0H3.75M12 12.75h.008v.008H12v-.008zM12 16.5h.008v.008H12v-.008zM12 20.25h.008v.008H12v-.008z" />
-    )
-  },
+
   'Cook': {
-    title: 'Line Cook Hub',
+    title: 'Kitchen Hub',
     description: 'Access recipes, station prep guides, plating standards, and kitchen workflows to help you deliver consistent, high-quality dishes.',
     icon: (
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.5 20.5v-1.5a.5.5 0 01.5-.5h2a.5.5 0 01.5.5v1.5M10.5 19v-4m-1-4h3m-3-4h3" />
@@ -180,6 +167,7 @@ const DashboardPage = () => {
     {
       title: 'Hot Schedules',
       description: 'Check your schedule, request time off, and manage shift swaps—all in one place.',
+      link: 'https://app.hotschedules.com/hs/login.jsp',
       icon: (
         <path
           strokeLinecap="round"
@@ -189,27 +177,11 @@ const DashboardPage = () => {
         />
       ),
       onClick: () => {
-        console.log("Server Hub clicked");
-        router.push('/training_screen');
+        window.open("https://app.hotschedules.com/hs/login.jsp", "_blank");
+       
       },
     },
-    {
-      title: 'Events',
-      description:
-        'Never miss a beat. Stay informed with real-time team updates and important alerts.',
-      icon: (
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M8 12h8m-4 4h4"
-        />
-      ),
-      onClick: () => {
-        console.log("AI Chat clicked");
-        router.push('/ai_chat');
-      },
-    },
+    
     {
       title: 'Menu Features',
       description:
@@ -223,8 +195,8 @@ const DashboardPage = () => {
         />
       ),
       onClick: () => {
-        console.log("Employee Manual clicked");
-        router.push('/employee_manual');
+        window.open("https://www.oceansidebeachgrill.com/features", "_blank");
+       
       },
     },
   ];

@@ -24,4 +24,4 @@ enableIndexedDbPersistence(db).catch((err) => {
   }
 });
 
-export { auth, db };
+export { auth, db, firebaseConfig };
