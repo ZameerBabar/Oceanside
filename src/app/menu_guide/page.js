@@ -14,17 +14,26 @@ const getDriveImageUrl = (url) => {
   return url;
 };
 
-// Available allergen filters
-const allergenOptions = [
+// ✅ Separate allergen filters for Food & Drink
+const foodAllergenOptions = [
   "Milk",
   "Eggs",
   "Fish",
-  "Shellfish",
-  "Tree nuts",
-  "Peanuts",
+  "ShellFish",
   "Wheat",
+  "Tree nuts",
   "Soybeans",
+  "Peanuts",
   "Sesame",
+];
+
+const drinkAllergenOptions = [
+  "Speciality Cocktails",
+  "Bukets",
+  "Beer",
+  "Wine",
+  "Frozen Drinks",
+  "Seltzers"
 ];
 
 export default function MenuGuide() {
@@ -33,8 +42,8 @@ export default function MenuGuide() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [selectedAllergens, setSelectedAllergens] = useState([]); // Temporary selections
-  const [appliedAllergens, setAppliedAllergens] = useState([]); // Actually applied filters
+  const [selectedAllergens, setSelectedAllergens] = useState([]); 
+  const [appliedAllergens, setAppliedAllergens] = useState([]); 
 
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -60,7 +69,7 @@ export default function MenuGuide() {
     fetchMenuItems();
   }, []);
 
-  // ✅ Outside click se dropdown band ho
+  // Outside click se dropdown band ho
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -71,14 +80,18 @@ export default function MenuGuide() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ Filter options active tab ke hisaab se
+  const allergenOptions =
+    activeTab === "Food" ? foodAllergenOptions : drinkAllergenOptions;
+
   // Filtering logic
   const filteredItems = menuItems
-    .filter((item) => item.category === activeTab) // Tab filter
+    .filter((item) => item.category === activeTab) 
     .filter((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) // Search filter
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((item) => {
-      if (appliedAllergens.length === 0) return true; // No allergen filter applied
+      if (appliedAllergens.length === 0) return true; 
 
       const ingredients = item.ingredients
         ? item.ingredients.toLowerCase().split(",").map((ing) => ing.trim())
@@ -88,7 +101,6 @@ export default function MenuGuide() {
         ? item.allergens.toLowerCase().split(",").map((a) => a.trim())
         : [];
 
-      // ❌ Hide items containing any selected allergen
       return !appliedAllergens.some((allergen) => {
         const lowerAllergen = allergen.toLowerCase();
         return (
@@ -114,7 +126,7 @@ export default function MenuGuide() {
     <div
       className="min-h-screen p-8 flex flex-col items-center bg-gray-100"
       style={{
-        backgroundImage: "linear-gradient(135deg, #34916aff, #38c755ff)",
+        backgroundImage: "linear-gradient(135deg, #d4edc9, #34916aff)",
       }}
     >
       <div className="max-w-6xl w-full">
@@ -139,7 +151,11 @@ export default function MenuGuide() {
           {/* Tabs */}
           <div className="flex items-center rounded shadow-lg overflow-hidden">
             <button
-              onClick={() => setActiveTab("Drink")}
+              onClick={() => {
+                setActiveTab("Drink");
+                setSelectedAllergens([]);
+                setAppliedAllergens([]);
+              }}
               className={`font-semibold px-6 py-2 transition-colors duration-200 ${
                 activeTab === "Drink"
                   ? "bg-green-700 text-white"
@@ -149,7 +165,11 @@ export default function MenuGuide() {
               Drinks
             </button>
             <button
-              onClick={() => setActiveTab("Food")}
+              onClick={() => {
+                setActiveTab("Food");
+                setSelectedAllergens([]);
+                setAppliedAllergens([]);
+              }}
               className={`font-semibold px-6 py-2 transition-colors duration-200 ${
                 activeTab === "Food"
                   ? "bg-green-700 text-white"
@@ -177,14 +197,12 @@ export default function MenuGuide() {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow hover:bg-green-50"
               >
-                Filter Allergens <ChevronDown size={18} />
+                Filter  <ChevronDown size={18} />
               </button>
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border p-3 z-10 max-h-64 overflow-y-auto">
-                  {/* ✅ Default Option */}
-                  <label
-                    className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded"
-                  >
+                  {/* Default Option */}
+                  <label className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded">
                     <input
                       type="checkbox"
                       checked={selectedAllergens.length === 0}
@@ -194,10 +212,12 @@ export default function MenuGuide() {
                         setShowDropdown(false);
                       }}
                     />
-                    <span className="text-sm text-gray-700">Default (Show All)</span>
+                    <span className="text-sm text-gray-700">
+                      Default 
+                    </span>
                   </label>
 
-                  {/* ✅ Dynamic Allergen Options */}
+                  {/* Dynamic Allergen Options */}
                   {allergenOptions.map((allergen) => (
                     <label
                       key={allergen}
@@ -218,7 +238,7 @@ export default function MenuGuide() {
                     </label>
                   ))}
 
-                  {/* ✅ Apply Filter Button */}
+                  {/* Apply Filter Button */}
                   {selectedAllergens.length > 0 && (
                     <button
                       onClick={() => {
