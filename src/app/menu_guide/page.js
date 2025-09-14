@@ -14,7 +14,7 @@ const getDriveImageUrl = (url) => {
   return url;
 };
 
-// ✅ Separate allergen filters for Food & Drink
+// Separate allergen filters for Food & Drink
 const foodAllergenOptions = [
   "Milk",
   "Eggs",
@@ -33,7 +33,22 @@ const drinkAllergenOptions = [
   "Beer",
   "Wine",
   "Frozen Drinks",
-  "Seltzers"
+  "Seltzers",
+];
+
+// New food category options
+const foodCategoryOptions = [
+  "Breakfast",
+  "Appetizers",
+  "Salads",
+  "Handhelds",
+  "Seafood",
+  "Pasta",
+  "Chicken",
+  "Steak",
+  "Sides",
+  "Happy Hour",
+  "Dessert",
 ];
 
 export default function MenuGuide() {
@@ -42,11 +57,16 @@ export default function MenuGuide() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [selectedAllergens, setSelectedAllergens] = useState([]); 
-  const [appliedAllergens, setAppliedAllergens] = useState([]); 
+  const [selectedAllergens, setSelectedAllergens] = useState([]);
+  const [appliedAllergens, setAppliedAllergens] = useState([]);
 
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [appliedCategory, setAppliedCategory] = useState("");
+
+  const [showAllergenDropdown, setShowAllergenDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const allergenDropdownRef = useRef(null);
+  const categoryDropdownRef = useRef(null);
 
   // Fetch menu data
   useEffect(() => {
@@ -65,38 +85,54 @@ export default function MenuGuide() {
         setLoading(false);
       }
     };
-
     fetchMenuItems();
   }, []);
 
-  // Outside click se dropdown band ho
+  // Outside click to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+      if (
+        allergenDropdownRef.current &&
+        !allergenDropdownRef.current.contains(event.target)
+      ) {
+        setShowAllergenDropdown(false);
+      }
+      if (
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target)
+      ) {
+        setShowCategoryDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Filter options active tab ke hisaab se
   const allergenOptions =
     activeTab === "Food" ? foodAllergenOptions : drinkAllergenOptions;
 
   // Filtering logic
   const filteredItems = menuItems
-    .filter((item) => item.category === activeTab) 
+    .filter((item) => item.category === activeTab)
     .filter((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((item) => {
-      if (appliedAllergens.length === 0) return true; 
+      // ✅ Filter by selected food category
+      if (activeTab === "Food" && appliedCategory) {
+        return (
+          item.subCategory &&
+          item.subCategory.toLowerCase() === appliedCategory.toLowerCase()
+        );
+      }
+      return true;
+    })
+    .filter((item) => {
+      if (appliedAllergens.length === 0) return true;
 
       const ingredients = item.ingredients
         ? item.ingredients.toLowerCase().split(",").map((ing) => ing.trim())
         : [];
-
       const allergens = item.allergens
         ? item.allergens.toLowerCase().split(",").map((a) => a.trim())
         : [];
@@ -104,10 +140,21 @@ export default function MenuGuide() {
       return !appliedAllergens.some((allergen) => {
         const lowerAllergen = allergen.toLowerCase();
         return (
-          ingredients.includes(lowerAllergen) || allergens.includes(lowerAllergen)
+          ingredients.includes(lowerAllergen) ||
+          allergens.includes(lowerAllergen)
         );
       });
     });
+
+  // Reset filters when tabs change
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchTerm("");
+    setSelectedAllergens([]);
+    setAppliedAllergens([]);
+    setSelectedCategory("");
+    setAppliedCategory("");
+  };
 
   if (loading) {
     return (
@@ -151,11 +198,7 @@ export default function MenuGuide() {
           {/* Tabs */}
           <div className="flex items-center rounded shadow-lg overflow-hidden">
             <button
-              onClick={() => {
-                setActiveTab("Drink");
-                setSelectedAllergens([]);
-                setAppliedAllergens([]);
-              }}
+              onClick={() => handleTabChange("Drink")}
               className={`font-semibold px-6 py-2 transition-colors duration-200 ${
                 activeTab === "Drink"
                   ? "bg-green-700 text-white"
@@ -165,11 +208,7 @@ export default function MenuGuide() {
               Drinks
             </button>
             <button
-              onClick={() => {
-                setActiveTab("Food");
-                setSelectedAllergens([]);
-                setAppliedAllergens([]);
-              }}
+              onClick={() => handleTabChange("Food")}
               className={`font-semibold px-6 py-2 transition-colors duration-200 ${
                 activeTab === "Food"
                   ? "bg-green-700 text-white"
@@ -180,8 +219,8 @@ export default function MenuGuide() {
             </button>
           </div>
 
-          {/* Search bar + Filter together */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Search bar + Filters together */}
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
             {/* Search Bar */}
             <input
               type="text"
@@ -191,15 +230,72 @@ export default function MenuGuide() {
               className="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 bg-white w-full sm:w-64"
             />
 
-            {/* Dropdown filter */}
-            <div className="relative" ref={dropdownRef}>
+            {/* New Category Dropdown for Food */}
+            {activeTab === "Food" && (
+              <div className="relative" ref={categoryDropdownRef}>
+                <button
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow hover:bg-green-50"
+                >
+                  Category <ChevronDown size={18} />
+                </button>
+                {showCategoryDropdown && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border p-3 z-10 max-h-64 overflow-y-auto">
+                    {/* Default Option */}
+                    <label className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded">
+                      <input
+                        type="radio"
+                        name="category"
+                        checked={selectedCategory === ""}
+                        onChange={() => {
+                          setSelectedCategory("");
+                          setAppliedCategory("");
+                          setShowCategoryDropdown(false);
+                        }}
+                      />
+                      <span className="text-sm text-gray-700">All</span>
+                    </label>
+                    {/* Dynamic Category Options */}
+                    {foodCategoryOptions.map((category) => (
+                      <label
+                        key={category}
+                        className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded"
+                      >
+                        <input
+                          type="radio"
+                          name="category"
+                          checked={selectedCategory === category}
+                          onChange={() => setSelectedCategory(category)}
+                        />
+                        <span className="text-sm text-gray-700">
+                          {category}
+                        </span>
+                      </label>
+                    ))}
+                    {/* Apply Button */}
+                    <button
+                      onClick={() => {
+                        setAppliedCategory(selectedCategory);
+                        setShowCategoryDropdown(false);
+                      }}
+                      className="w-full mt-3 px-4 py-2 bg-green-600 text-white rounded-lg"
+                    >
+                      Apply Category
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Allergen Dropdown filter */}
+            <div className="relative" ref={allergenDropdownRef}>
               <button
-                onClick={() => setShowDropdown(!showDropdown)}
+                onClick={() => setShowAllergenDropdown(!showAllergenDropdown)}
                 className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow hover:bg-green-50"
               >
-                Filter  <ChevronDown size={18} />
+                Filter <ChevronDown size={18} />
               </button>
-              {showDropdown && (
+              {showAllergenDropdown && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border p-3 z-10 max-h-64 overflow-y-auto">
                   {/* Default Option */}
                   <label className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded">
@@ -209,12 +305,10 @@ export default function MenuGuide() {
                       onChange={() => {
                         setSelectedAllergens([]);
                         setAppliedAllergens([]);
-                        setShowDropdown(false);
+                        setShowAllergenDropdown(false);
                       }}
                     />
-                    <span className="text-sm text-gray-700">
-                      Default 
-                    </span>
+                    <span className="text-sm text-gray-700">Default</span>
                   </label>
 
                   {/* Dynamic Allergen Options */}
@@ -243,7 +337,7 @@ export default function MenuGuide() {
                     <button
                       onClick={() => {
                         setAppliedAllergens(selectedAllergens);
-                        setShowDropdown(false);
+                        setShowAllergenDropdown(false);
                       }}
                       className="w-full mt-3 px-4 py-2 bg-green-600 text-white rounded-lg"
                     >
@@ -267,7 +361,8 @@ export default function MenuGuide() {
                 {/* Image */}
                 <div className="flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden">
                   <img
-                    src={getDriveImageUrl(item.image_url)}
+                    // ✅ Use a default placeholder image if item.image_url is empty
+                    src={getDriveImageUrl(item.image_url) || "https://via.placeholder.com/150"}
                     alt={item.name}
                     className="object-cover w-full h-full"
                   />
@@ -280,9 +375,13 @@ export default function MenuGuide() {
                   <p className="text-sm text-gray-600 mb-2">
                     {item.description}
                   </p>
-                  <p className="text-sm text-red-500 font-medium">
-                    Allergens: {item.allergens}
-                  </p>
+                  {/* ✅ Conditionally render 'Allergens' label */}
+                  {item.allergens && (
+                    <p className="text-sm text-red-500 font-medium">
+                      {activeTab === "Food" && "Allergens: "}
+                      {item.allergens}
+                    </p>
+                  )}
                 </div>
               </div>
             ))
