@@ -28,8 +28,8 @@ const foodAllergenOptions = [
 ];
 
 const drinkAllergenOptions = [
-  "Speciality Cocktails",
-  "Bukets",
+  "Specialty Cocktails",
+  "Buckets",
   "Beer",
   "Wine",
   "Frozen Drinks",
