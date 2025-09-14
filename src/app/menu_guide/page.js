@@ -137,13 +137,27 @@ export default function MenuGuide() {
         ? item.allergens.toLowerCase().split(",").map((a) => a.trim())
         : [];
 
-      return !appliedAllergens.some((allergen) => {
-        const lowerAllergen = allergen.toLowerCase();
-        return (
-          ingredients.includes(lowerAllergen) ||
-          allergens.includes(lowerAllergen)
-        );
-      });
+      // ✅ This is the main change:
+      if (activeTab === "Food") {
+        // For Food: Hide items with selected allergens
+        return !appliedAllergens.some((allergen) => {
+          const lowerAllergen = allergen.toLowerCase();
+          return (
+            ingredients.includes(lowerAllergen) ||
+            allergens.includes(lowerAllergen)
+          );
+        });
+      } else if (activeTab === "Drink") {
+        // For Drinks: Only show items with selected "allergens" (drink types)
+        return appliedAllergens.some((allergen) => {
+          const lowerAllergen = allergen.toLowerCase();
+          return (
+            ingredients.includes(lowerAllergen) ||
+            allergens.includes(lowerAllergen)
+          );
+        });
+      }
+      return true; // Fallback
     });
 
   // Reset filters when tabs change
@@ -361,8 +375,10 @@ export default function MenuGuide() {
                 {/* Image */}
                 <div className="flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden">
                   <img
-                    // ✅ Use a default placeholder image if item.image_url is empty
-                    src={getDriveImageUrl(item.image_url) || "https://via.placeholder.com/150"}
+                    src={
+                      getDriveImageUrl(item.image_url) ||
+                      "https://via.placeholder.com/150"
+                    }
                     alt={item.name}
                     className="object-cover w-full h-full"
                   />
@@ -375,7 +391,6 @@ export default function MenuGuide() {
                   <p className="text-sm text-gray-600 mb-2">
                     {item.description}
                   </p>
-                  {/* ✅ Conditionally render 'Allergens' label */}
                   {item.allergens && (
                     <p className="text-sm text-red-500 font-medium">
                       {activeTab === "Food" && "Allergens: "}

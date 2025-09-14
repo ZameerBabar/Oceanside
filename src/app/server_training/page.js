@@ -107,7 +107,7 @@ export default function ServerTrainingPage() {
             {/* Top Section with Background Image */}
             <div
                 className="w-full h-[500px] bg-cover bg-top"
-                style={{ backgroundImage: 'url(https://img.freepik.com/premium-photo/portrait-two-beautiful-female-waitress-smiling-camera_8595-17930.jpg)' }}
+                style={{ backgroundImage: 'url(https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FServers.JPG?alt=media&token=cc9f0d9a-dab4-42c0-8d80-8f6c95348820)', backgroundPosition: 'center'  }}
             >
                 {/* Dark Overlay for better text readability */}
                 <div className="absolute inset-0 h-[500px] bg-black opacity-60" />
@@ -227,10 +227,10 @@ export default function ServerTrainingPage() {
 
                             {/* Games & Challenges Card moved below Gold Medal */}
                             <div className="bg-white p-6 rounded-3xl shadow-xl">
-                                <h2 className="text-xl font-semibold text-gray-800 mb-4">Challenges</h2>
+                                <h2 className="text-xl font-semibold text-gray-800 mb-4">Seating Chart</h2>
                                 <div className="space-y-3">
                                     <button
-                                        onClick={() => router.replace('/menu-memory-game')}
+                                        onClick={() => router.replace('/seating_chat_server')}
                                         className="w-full flex items-center justify-between bg-blue-100 text-blue-800 font-medium py-3 px-4 rounded-lg hover:bg-blue-200">
                                         <div className="flex items-center gap-2">
                                             <Trophy size={18} />

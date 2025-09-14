@@ -57,19 +57,19 @@ export default function HubPage() {
       {
         title: "Menu Training",
         description: "Food offerings and bar cocktails with photos and ingredients.",
-        imageSrc: "https://www.refrigeratedfrozenfood.com/ext/resources/NEW_RD_Website/DefaultImages/default-pasta.jpg?1430942591",
+        imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Menu_Item%2FBreakfast%2FStuffed%20French%20Toast.png?alt=media&token=54724791-e4cd-419c-85c4-9e8064f2de65",
         altText: "Plates of food and drinks on a table"
       },
       {
         title: "Server Training Manual",
         description: "Learn all the key skills and procedures for excellent service.",
-        imageSrc: "https://lesroches.edu/wp-content/uploads/2022/08/Restaurant_business_plan_main.jpg",
+        imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FTeam%20Photo.jpg?alt=media&token=d00cbbe0-6de4-4537-926e-f98de1bd732d",
         altText: "A green manual book"
       },
       {
         title: "Seating Chart",
         description: "Understand table numbers and layout.",
-        imageSrc: "https://img.freepik.com/premium-photo/elegant-green-hardcover-books-surrounded-by-lush-greenery-exuding-calm-nature-inspired_996993-55421.jpg?semt=ais_hybrid&w=740&q=80",
+        imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FSeating%20Chart.jpg?alt=media&token=9aa58b1c-9515-4526-aef5-476f73959d20",
         altText: "A restaurant seating chart"
       }
     ]
@@ -106,21 +106,21 @@ const cookHubData = {
     description: "Your all-in-one resource for seating charts, training guides, and shift notes to keep the front of house running smoothly.",
     cards: [
       {
-        title: "Seating Chart",
-        description: "Understand table numbers, sections, and layout",
-        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Seating+Chart",
+        title: "Recipe Library",
+        description: "Browse and learn menu recipes with ingredients and steps.",
+        imageSrc: "https://images.immediate.co.uk/production/volatile/sites/30/2022/08/Fish-Tacos-1337495.jpg?quality=90&resize=708,643",
         altText: "A seating chart diagram"
       },
       {
-        title: "Host/Hostess Training Manual",
-        description: "Learn key greeting, seating, and guest experience skills",
-        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Training+Manual",
+        title: "Kitchen Safety",
+        description: "Understand safety protocols and kitchen procedures.",
+        imageSrc: "https://www.bondcleaninginmelbourne.com.au/wp-content/uploads/2021/08/kitchen-cleaning.jpg",
         altText: "A training manual"
       },
       {
-        title: "Shift Notes",
-        description: "View important updates for today's shift, including a specials, VIP guests, and any service changes",
-        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Shift+Notes",
+        title: "Kitchen Training Manual",
+        description: "Step-by-step guide for kitchen practices and procedures.",
+        imageSrc: "https://www.restaurant365.com/wp-content/uploads/2024/07/RestaurantMenuTrainingStaffFun-1024x681.png",
         altText: "A notebook with shift notes"
       }
     ]
@@ -187,6 +187,9 @@ const cookHubData = {
     }
      else if (cardTitle === "Bartender Training Manual") {
       router.push('/bartender_training');
+    }
+    else if (cardTitle === "Recipe Library") {
+      router.push('/recipe_library');
     }
       else if (cardTitle === "Shift Notes") {
       router.push('/shift_note');
