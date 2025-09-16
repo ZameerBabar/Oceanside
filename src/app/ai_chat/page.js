@@ -265,7 +265,7 @@ const AIChatScreen = () => {
             background: "linear-gradient(135deg, #34916aff, #38c755ff)",
             color: "white",
           }}
-          placeholder="Apna message likhein..."
+          placeholder="What you want to ask?"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {

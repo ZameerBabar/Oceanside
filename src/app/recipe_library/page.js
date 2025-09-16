@@ -1,5 +1,6 @@
 'use client'
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, ChevronRight, Filter } from 'lucide-react';
 
 // Dummy data for Single Recipes
@@ -28,7 +29,6 @@ const dummySingleRecipes = [
     category: 'Handhelds',
     imageUrl: 'https://assets.bwbx.io/images/users/iqjWHBFdfxIU/ii8hsWpGpOx4/v2/-1x-1.webp',
   },
-  
 ];
 
 // Dummy data for Batch Recipes List
@@ -92,6 +92,7 @@ const dummyBatchRecipe = {
 };
 
 export default function RecipeLibrary() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('single');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -99,6 +100,12 @@ export default function RecipeLibrary() {
   const [selectedBatchRecipe, setSelectedBatchRecipe] = useState(dummyBatchRecipe);
 
   const categories = ['All', ...new Set(dummySingleRecipes.map(recipe => recipe.category))];
+
+  const handleViewRecipe = (recipe) => {
+    // Recipe data ko query parameters ke through pass karte hain
+    const recipeData = encodeURIComponent(JSON.stringify(recipe));
+    router.replace(`/view_procedure?recipe=${recipeData}`);
+  };
 
   const filteredRecipes = dummySingleRecipes.filter(recipe => {
     const matchesCategory = selectedCategory === 'All' || recipe.category === selectedCategory;
@@ -204,8 +211,11 @@ export default function RecipeLibrary() {
                         {recipe.name}
                       </h3>
                       
-                      <button className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-indigo-700 transition-colors">
-                        View Recipe
+                      <button 
+                        onClick={() => handleViewRecipe(recipe)}
+                        className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
+                      >
+                        View procedure
                         <ChevronRight size={16} />
                       </button>
                     </div>

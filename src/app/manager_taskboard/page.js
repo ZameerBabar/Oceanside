@@ -26,7 +26,7 @@ const App = () => {
   const [userId, setUserId] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  const teamMembers = ['Sarah', 'Mike', 'Alex', 'John'];
+  const teamMembers = ['Tony', 'Anna', 'Johnny', 'Dan'];
 
   // ✅ Auth
   useEffect(() => {

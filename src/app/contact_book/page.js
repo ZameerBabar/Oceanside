@@ -1,25 +1,38 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig'; // <-- apni firebaseConfig file ka path sahi rakhna
 
 // ==========================================================
 // Main App Component
 // ==========================================================
 const App = () => {
-  // Mock data for contacts
-  const [contacts] = useState([
-    { id: 1, name: 'Farhan Ali', company: 'Oceanside Ownership', email: 'farhan.ali@oceanside.com', phone: '(555) 123-4567', category: 'Owners' },
-    { id: 2, name: 'Ayesha Khan', company: 'Fresh Foods Inc.', email: 'a.khan@freshfoods.com', phone: '(555) 567-8901', category: 'Suppliers' },
-    { id: 3, name: 'Zainab Ahmed', company: 'PlumbRite Solutions', email: 'zainab.a@plumbrite.com', phone: '(555) 876-5432', category: 'Contractors' },
-    { id: 4, name: 'Hassan Siddiqui', company: 'City Health Dept.', email: 'h.siddiqui@city.gov', phone: '(555) 432-1098', category: 'City/Regulatory' },
-    { id: 5, name: 'Ibrahim Malik', company: 'TechFix Systems', email: 'ibrahim.m@techfix.com', phone: '(555) 987-6543', category: 'Contractors' },
-    { id: 6, name: 'Sana Javed', company: 'Green Harvest Co.', email: 'sana.j@greenharvest.com', phone: '(555) 112-2334', category: 'Suppliers' },
-    { id: 7, name: 'Usman Chaudhry', company: 'Oceanside Ownership', email: 'u.chaudhry@oceanside.com', phone: '(555) 334-4556', category: 'Owners' },
-    { id: 8, name: 'Saima Bano', company: 'City Fire Department', email: 'saima.bano@city.gov', phone: '(555) 556-6778', category: 'City/Regulatory' },
-    { id: 9, name: 'Ali Raza', company: 'Electra Electricians', email: 'ali.r@electra.com', phone: '(555) 778-8990', category: 'Contractors' },
-  ]);
+  // Firestore se data store karne ke liye state
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+
+  // Firestore se data fetch
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'contacts'));
+        const contactList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setContacts(contactList);
+      } catch (error) {
+        console.error('Error fetching contacts: ', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContacts();
+  }, []);
 
   // Contacts ko search term aur category ke hisaab se filter karein
   const filteredContacts = useMemo(() => {
@@ -32,8 +45,8 @@ const App = () => {
     if (searchTerm) {
       const lowercasedTerm = searchTerm.toLowerCase();
       filtered = filtered.filter(contact =>
-        contact.name.toLowerCase().includes(lowercasedTerm) ||
-        contact.company.toLowerCase().includes(lowercasedTerm)
+        contact.name?.toLowerCase().includes(lowercasedTerm) ||
+        contact.company?.toLowerCase().includes(lowercasedTerm)
       );
     }
     return filtered;
@@ -71,50 +84,54 @@ const App = () => {
 
         {/* Contact Table */}
         <div className="bg-gray-50 rounded-xl shadow-md overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Company
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                  Email
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                  Phone
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredContacts.length > 0 ? (
-                filteredContacts.map(contact => (
-                  <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{contact.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{contact.company}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
-                      <a href={`mailto:${contact.email}`} className="text-green-600 hover:text-green-800">{contact.email}</a>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
-                      <a href={`tel:${contact.phone}`} className="text-green-600 hover:text-green-800">{contact.phone}</a>
+          {loading ? (
+            <div className="p-6 text-center text-gray-500">Loading contacts...</div>
+          ) : (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                    Company
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    Email
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    Phone
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredContacts.length > 0 ? (
+                  filteredContacts.map(contact => (
+                    <tr key={contact.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{contact.name}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{contact.company}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
+                        <a href={`mailto:${contact.email}`} className="text-green-600 hover:text-green-800">{contact.email}</a>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden sm:table-cell">
+                        <a href={`tel:${contact.phone}`} className="text-green-600 hover:text-green-800">{contact.phone}</a>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
+                      Koi contact nahi mila.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center text-sm text-gray-500">
-                    Koi contact nahi mila.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

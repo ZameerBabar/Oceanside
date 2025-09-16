@@ -66,7 +66,7 @@ const DashboardPage = () => {
       // After a successful sign out, redirect to the login page.
       router.push('/');
     } catch (error) {
-      console.error("Logout karne mein koi masla hua:", error);
+      console.error("Something went Wrong!:", error);
     }
   };
   
