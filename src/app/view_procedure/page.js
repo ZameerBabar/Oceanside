@@ -1,58 +1,58 @@
 'use client'
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig'; // Apni firebaseConfig file ka path sahi rakhna
 import { ArrowLeft, Play, ChefHat, Clock } from 'lucide-react';
 
-// Recipe details generator function
-const getRecipeDetails = (recipe) => ({
-  ...recipe,
-  videoUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-  ingredients: [
-    '1 lb large shrimp',
-    '2 tbsp olive oil',
-    '1 tsp chili powder',
-    '1/2 tsp cumin',
-    '8 corn tortillas',
-    '1 cup cabbage',
-    '1 avocado, sliced',
-    'Salt and pepper'
-  ],
-  preparation: [
-    'Heat oil in a large pan over medium-high heat.',
-    'Season shrimp with chili powder, cumin, salt and pepper.',
-    'Cook shrimp for 2-3 minutes per side until pink.',
-    'Warm tortillas in a dry skillet.',
-    'Fill tortillas with shrimp, cabbage, and avocado.',
-    'Serve immediately with lime wedges.'
-  ]
-});
-
-// Original component, now wrapped in Suspense for the fix
+// A new component to handle the logic that uses useSearchParams
 function ViewProceduresInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [recipe, setRecipe] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const recipeParam = searchParams.get('recipe');
-    if (recipeParam) {
-      try {
-        const decodedRecipe = JSON.parse(decodeURIComponent(recipeParam));
-        setRecipe(decodedRecipe);
-      } catch (error) {
-        console.error('Error parsing recipe data:', error);
-        router.push('/recipe-library');
+    const recipeId = searchParams.get('recipeId');
+
+    const fetchRecipeFromFirebase = async () => {
+      if (!recipeId) {
+        setLoading(false);
+        setError("No recipe ID provided.");
+        return;
       }
-    } else {
-      router.push('/recipe_library');
-    }
-  }, [searchParams, router]);
+      
+      try {
+        const docRef = doc(db, "SingleRecipe", recipeId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const fetchedRecipe = { id: docSnap.id, ...docSnap.data() };
+          // Ensure nested fields are arrays to prevent errors
+          if (!Array.isArray(fetchedRecipe.ingredients)) fetchedRecipe.ingredients = [];
+          if (!Array.isArray(fetchedRecipe.preparation)) fetchedRecipe.preparation = [];
+          
+          setRecipe(fetchedRecipe);
+        } else {
+          setError("No such recipe exists!");
+        }
+      } catch (e) {
+        console.error("Error fetching document: ", e);
+        setError("Error fetching recipe data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipeFromFirebase();
+  }, [searchParams]);
 
   const handleBackToLibrary = () => {
     router.replace('/recipe_library');
   };
 
-  if (!recipe) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#34916aff] to-[#d4edc9] flex items-center justify-center">
         <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -63,7 +63,37 @@ function ViewProceduresInner() {
     );
   }
 
-  const recipeDetails = getRecipeDetails(recipe);
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#34916aff] to-[#d4edc9] flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-lg p-6 text-center text-red-600 font-bold">
+          <p>Error: {error}</p>
+          <button
+            onClick={handleBackToLibrary}
+            className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!recipe) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-[#34916aff] to-[#d4edc9] flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+            <p className="text-gray-600">Recipe not found.</p>
+            <button
+              onClick={handleBackToLibrary}
+              className="mt-4 px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+            >
+              Back to Library
+            </button>
+          </div>
+        </div>
+      );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#34916aff] to-[#d4edc9]">
@@ -73,13 +103,13 @@ function ViewProceduresInner() {
           <div className="flex items-center justify-between">
             <button 
               onClick={handleBackToLibrary}
-              className="flex items-center gap-2  px-3 py-2 rounded-lg hover:bg-white/30 transition-all text-sm"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/30 transition-all text-sm"
             >
               <ArrowLeft size={18} />
               Back
             </button>
             <h1 className="text-2xl font-bold text-center flex-1 mx-4">
-              {recipeDetails.name}
+              {recipe.name}
             </h1>
             <div className="w-16"></div> {/* Spacer for center alignment */}
           </div>
@@ -96,9 +126,9 @@ function ViewProceduresInner() {
               <video 
                 className="w-full h-64 bg-gray-900 object-cover"
                 controls
-                poster={recipeDetails.imageUrl}
+                poster={recipe.imageUrl}
               >
-                <source src={recipeDetails.videoUrl} type="video/mp4" />
+                <source src={recipe.videoUrl} type="video/mp4" />
                 Your browser does not support video.
               </video>
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all flex items-center justify-center pointer-events-none">
@@ -123,7 +153,7 @@ function ViewProceduresInner() {
               <h3 className="text-lg font-bold text-gray-800">Ingredients</h3>
             </div>
             <div className="space-y-2">
-              {recipeDetails.ingredients.map((ingredient, index) => (
+              {recipe.ingredients?.map((ingredient, index) => (
                 <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-green-50 transition-colors">
                   <span className="bg-green-100 text-green-700 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
                     {index + 1}
@@ -142,7 +172,7 @@ function ViewProceduresInner() {
             <h3 className="text-lg font-bold text-gray-800">Preparation Steps</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {recipeDetails.preparation.map((step, index) => (
+            {recipe.preparation?.map((step, index) => (
               <div key={index} className="flex gap-3 p-3 rounded-lg bg-gray-50 hover:bg-blue-50 transition-colors">
                 <span className="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                   {index + 1}
