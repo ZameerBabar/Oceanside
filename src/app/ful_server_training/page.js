@@ -50,6 +50,10 @@ export default function ServerTraining() {
       } else if (role === "Bartender") { // Note: case-sensitive match with your Firestore data
         trainingDocRef = doc(db, "Full Bartender Training", "data");
         dataField = "bartenderTraining";
+      }
+      else if (role === "Host") { // Note: case-sensitive match with your Firestore data
+        trainingDocRef = doc(db, "Full Host Training", "data");
+        dataField = "HostTraining";
       } else {
         console.log("Unknown role:", role);
         setLoading(false);

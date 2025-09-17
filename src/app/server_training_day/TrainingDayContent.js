@@ -21,25 +21,22 @@ export default function ServerTrainingDay1() {
 
     useEffect(() => {
         const day = searchParams.get('day');
-        if (day) {
-            setSelectedDay(day);
+        if (!day) {
+            setLoading(false);
+            return;
         }
-    }, [searchParams]);
 
-    useEffect(() => {
-        if (!selectedDay) return;
+        setSelectedDay(day);
 
         const fetchUserRoleAndTrainingData = async (user) => {
             try {
-                // First fetch user role
                 const userDocRef = doc(db, "users", user.uid);
                 const userDocSnap = await getDoc(userDocRef);
                 
                 if (!userDocSnap.exists()) {
-                    console.log("User document not found!");
+                    console.error("User document not found!");
                     setUserRole(null);
                     setTrainingData([]);
-                    setLoading(false);
                     return;
                 }
 
@@ -47,20 +44,21 @@ export default function ServerTrainingDay1() {
                 const role = userData.role;
                 setUserRole(role);
 
-                // Choose collection based on role
-                let collectionName = "Server Training Schedule"; // Default for Server
+                // Choose collection based on role - HOST ROLE ADDED HERE
+                let collectionName = "Server Training Schedule";
                 if (role === "Bartender") {
                     collectionName = "Bartender Training Schedule";
+                } else if (role === "Host") {
+                    collectionName = "Host Training Schedule";
                 }
 
-                // Fetch training data
-                const docRef = doc(db, collectionName, `day${selectedDay}`);
+                const docRef = doc(db, collectionName, `day${day}`);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     setTrainingData(docSnap.data().schedule);
                 } else {
-                    console.log(`No document found for day${selectedDay} in ${collectionName}!`);
+                    console.log(`No document found for day${day} in ${collectionName}!`);
                     setTrainingData([]);
                 }
             } catch (error) {
@@ -86,7 +84,7 @@ export default function ServerTrainingDay1() {
         });
         
         return () => unsubscribe();
-    }, [selectedDay]);
+    }, [searchParams]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -115,12 +113,14 @@ export default function ServerTrainingDay1() {
         try {
             const userDocRef = doc(db, "users", userId);
             
-            // Dynamically set the training day field name based on role and day
+            // Dynamically set the training day field name based on role and day - HOST ROLE ADDED HERE
             let trainingDayField;
             if (userRole === "Server") {
                 trainingDayField = `training_day_${selectedDay}`;
             } else if (userRole === "Bartender") {
                 trainingDayField = `bartender_training_day_${selectedDay}`;
+            } else if (userRole === "Host") {
+                trainingDayField = `host_training_day_${selectedDay}`;
             }
 
             await setDoc(userDocRef, {
@@ -226,7 +226,7 @@ export default function ServerTrainingDay1() {
                                     type="date"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="border-b border-gray-400 focus:border-green-500 outline-none px-2 py-1 w-168"
+                                    className="border-b border-gray-400 focus:border-green-500 outline-none px-2 py-1 w-[168px]"
                                     required
                                 />
                             </div>
@@ -238,7 +238,7 @@ export default function ServerTrainingDay1() {
                                     type="text"
                                     value={traineeName}
                                     onChange={(e) => setTraineeName(e.target.value)}
-                                    className="border-b border-gray-400 focus:border-green-500 outline-none px-2 py-1 w-150"
+                                    className="border-b border-gray-400 focus:border-green-500 outline-none px-2 py-1 w-[150px]"
                                     placeholder="Enter Trainee name and initials"
                                     required
                                 />

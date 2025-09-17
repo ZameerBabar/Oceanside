@@ -64,7 +64,13 @@ export default function QuizScreen() {
         const fetchQuizData = async () => {
             try {
                 // Choose collection based on role
-                const collectionName = userRole === 'Bartender' ? 'Bartender Training Quizes' : 'Server Training';
+                let collectionName = 'Server Training';
+                if (userRole === 'Bartender') {
+                    collectionName = 'Bartender Training Quizes';
+                } else if (userRole === 'Host') { // Host role added here
+                    collectionName = 'Host Training Quizes';
+                }
+
                 const docRef = doc(db, collectionName, `quiz${selectedQuiz}`);
                 const docSnap = await getDoc(docRef);
 
@@ -115,10 +121,13 @@ export default function QuizScreen() {
         if (passed && user) {
             const userDocRef = doc(db, 'users', user.uid);
             
-            // Save based on role
-            const fieldName = userRole === 'Bartender' ? 
-                `bartender_quiz_${selectedQuiz}_passed` : 
-                `quiz_${selectedQuiz}_passed`;
+            // Save based on role - Host role added here
+            let fieldName = `quiz_${selectedQuiz}_passed`;
+            if (userRole === 'Bartender') {
+                fieldName = `bartender_quiz_${selectedQuiz}_passed`;
+            } else if (userRole === 'Host') {
+                fieldName = `host_quiz_${selectedQuiz}_passed`;
+            }
                 
             await updateDoc(userDocRef, {
                 [fieldName]: true,
@@ -134,7 +143,13 @@ export default function QuizScreen() {
     };
 
     const getBackButtonRoute = () => {
-        return userRole === 'Bartender' ? '/bartender_training' : '/server_training';
+        if (userRole === 'Bartender') {
+            return '/bartender_training';
+        } else if (userRole === 'Host') { // Host role added here
+            return '/host_training';
+        } else {
+            return '/server_training';
+        }
     };
     
     // --- Render Logic ---
@@ -236,7 +251,7 @@ export default function QuizScreen() {
                                 >
                                     Try Again
                                 </button>
-                               
+                                
                             </>
                         )}
                     </div>

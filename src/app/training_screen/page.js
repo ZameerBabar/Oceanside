@@ -80,21 +80,21 @@ export default function HubPage() {
     description: "Your all-in-one resource for seating charts, training guides, and shift notes to keep the front of house running smoothly.",
     cards: [
       {
-        title: "Seating Chart",
-        description: "Understand table numbers, sections, and layout",
-        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Seating+Chart",
+        title: "Sidework Checklists",
+        description: "access and complete the sidework checklists",
+        imageSrc: "https://www.phly.com/CMSImages/BackgroundChecksBlogBanner-1440x40736-21390.jpg",
         altText: "A seating chart diagram"
       },
       {
-        title: "Host/Hostess Training Manual",
-        description: "Learn key greeting, seating, and guest experience skills",
-        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Training+Manual",
+        title: "Seating Chart",
+        description: "View the resturent seating layout",
+        imageSrc: "https://i.etsystatic.com/43809202/r/il/a7d240/6588095837/il_fullxfull.6588095837_ji2l.jpg",
         altText: "A training manual"
       },
       {
-        title: "Shift Notes",
-        description: "View important updates for today's shift, including a specials, VIP guests, and any service changes",
-        imageSrc: "https://placehold.co/400x250/d4edc9/34916aff?text=Shift+Notes",
+        title: "Host Training Manual",
+        description: " Training Modules for host and hostess",
+        imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FTeam%20Photo.jpg?alt=media&token=d00cbbe0-6de4-4537-926e-f98de1bd732d",
         altText: "A notebook with shift notes"
       }
     ]
@@ -191,8 +191,17 @@ const cookHubData = {
     else if (cardTitle === "Recipe Library") {
       router.push('/recipe_library');
     }
+     else if (cardTitle === "Kitchen Safety") {
+      router.push('/kitchen_safety');
+    }
+     else if (cardTitle === "Kitchen Training Manual") {
+      router.push('/kitchen_training');
+    }
       else if (cardTitle === "Shift Notes") {
       router.push('/shift_note');
+    }
+    else if (cardTitle === "Host Training Manual") {
+      router.push('/host_training');
     }
   };
 

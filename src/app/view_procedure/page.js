@@ -101,13 +101,7 @@ function ViewProceduresInner() {
       <div className="bg-gradient-to-r from-green-700 to-green-600 text-white shadow-lg">
         <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <button 
-              onClick={handleBackToLibrary}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/30 transition-all text-sm"
-            >
-              <ArrowLeft size={18} />
-              Back
-            </button>
+           
             <h1 className="text-2xl font-bold text-center flex-1 mx-4">
               {recipe.name}
             </h1>
