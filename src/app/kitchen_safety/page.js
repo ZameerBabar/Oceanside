@@ -127,9 +127,9 @@ export default function KitchenSafety() {
       <div className="flex-1 transition-all duration-300 p-2 lg:p-6 flex flex-col items-center">
         {/* Header */}
         <header className="w-full max-w-4xl bg-gradient-to-br from-green-800 to-green-500 rounded-2xl shadow-xl p-4 md:p-6 lg:p-8 mb-6 text-center">
-            <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-wide">
-                Kitchen Safety
-            </h1>
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-white tracking-wide">
+            Kitchen Safety
+          </h1>
         </header>
         
         {/* Mobile Sidebar Toggle */}
@@ -153,23 +153,21 @@ export default function KitchenSafety() {
           <div className="space-y-4 text-sm lg:text-base text-gray-700">
             {currentSection.content.map((paragraph, index) => {
               const isHeading = paragraph.startsWith("Standards:") || paragraph.startsWith("Why It Matters:");
-             const isStandardOrWhy = paragraph.startsWith("Move quickly ,") || paragraph.startsWith("Always announce") || paragraph.startsWith("Keep aisles,") || paragraph.startsWith("Immediately report") || paragraph.startsWith("Wear approved") || paragraph.startsWith("Wipe up") || paragraph.startsWith("Place wet") || paragraph.startsWith("Keep walkways") || paragraph.startsWith("Avoid carrying") || paragraph.startsWith("Always use") || paragraph.startsWith("Treat every") || paragraph.startsWith("Keep pot handles") || paragraph.startsWith("Open lids") || paragraph.startsWith("Never overfill") || paragraph.startsWith("Shake excess") || paragraph.startsWith("Use the right") || paragraph.startsWith("Keep your non-cutting") || paragraph.startsWith("Cut away") || paragraph.startsWith("Never leave") || paragraph.startsWith("Store knives") || paragraph.startsWith("Use cut-resistant") || paragraph.startsWith("Always keep") || paragraph.startsWith("Never mix") || paragraph.startsWith("Store chemicals") || paragraph.startsWith("Wear gloves") || paragraph.startsWith("Follow SDS") || paragraph.startsWith("Keep hands") || paragraph.startsWith("Never overload") || paragraph.startsWith("Do not use") || paragraph.startsWith("Unplug equipment") || paragraph.startsWith("If equipment") || paragraph.startsWith("Know the location") || paragraph.startsWith("Fire extinguishers:") || paragraph.startsWith("For grease fires:") || paragraph.startsWith("Report all injuries") || paragraph.startsWith("If unsure,") || paragraph.startsWith("No phones,") || paragraph.startsWith("No horseplay,") || paragraph.startsWith("Stay focused,") || paragraph.startsWith("Look out");
+              const isStandardOrWhy = paragraph.startsWith("Move quickly ,") || paragraph.startsWith("Always announce") || paragraph.startsWith("Keep aisles,") || paragraph.startsWith("Immediately report") || paragraph.startsWith("Wear approved") || paragraph.startsWith("Wipe up") || paragraph.startsWith("Place wet") || paragraph.startsWith("Keep walkways") || paragraph.startsWith("Avoid carrying") || paragraph.startsWith("Always use") || paragraph.startsWith("Treat every") || paragraph.startsWith("Keep pot handles") || paragraph.startsWith("Open lids") || paragraph.startsWith("Never overfill") || paragraph.startsWith("Shake excess") || paragraph.startsWith("Use the right") || paragraph.startsWith("Keep your non-cutting") || paragraph.startsWith("Cut away") || paragraph.startsWith("Never leave") || paragraph.startsWith("Store knives") || paragraph.startsWith("Use cut-resistant") || paragraph.startsWith("Always keep") || paragraph.startsWith("Never mix") || paragraph.startsWith("Store chemicals") || paragraph.startsWith("Wear gloves") || paragraph.startsWith("Follow SDS") || paragraph.startsWith("Keep hands") || paragraph.startsWith("Never overload") || paragraph.startsWith("Do not use") || paragraph.startsWith("Unplug equipment") || paragraph.startsWith("If equipment") || paragraph.startsWith("Know the location") || paragraph.startsWith("Fire extinguishers:") || paragraph.startsWith("For grease fires:") || paragraph.startsWith("Report all injuries") || paragraph.startsWith("If unsure,") || paragraph.startsWith("No phones,") || paragraph.startsWith("No horseplay,") || paragraph.startsWith("Stay focused,") || paragraph.startsWith("Look out");
               const isFirstSentence = index === 0 && !isHeading;
 
               if (isHeading) {
-                return <p key={index} className="text-base font-bold mt-4 mb-2 text-green-700">{paragraph}</p>;
+                return <p key={index} className="text-base font-bold mt-4 mb-2 text-green-700" dangerouslySetInnerHTML={{ __html: paragraph }} />;
               } else if (isStandardOrWhy) {
                 return (
                   <div key={index} className="flex items-start gap-2">
                     <span className="text-green-600 font-bold text-xl">•</span>
-                    <p className="leading-relaxed">{paragraph}</p>
+                    <p className="leading-relaxed" dangerouslySetInnerHTML={{ __html: paragraph }}></p>
                   </div>
                 );
               } else {
                 return (
-                  <p key={index} className={`leading-relaxed ${isFirstSentence ? 'font-medium' : ''}`}>
-                    {paragraph}
-                  </p>
+                  <p key={index} className={`leading-relaxed ${isFirstSentence ? 'font-medium' : ''}`} dangerouslySetInnerHTML={{ __html: paragraph }}></p>
                 );
               }
             })}
