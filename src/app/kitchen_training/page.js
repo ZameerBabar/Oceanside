@@ -216,7 +216,7 @@ export default function BackOfHouseTraining() {
           </div>
         </div>
 
-        {/* Pagination and Navigation Buttons */}
+        {/* Pagination and Navigation Buttonss */}
         <div className="w-full max-w-4xl flex justify-between items-center bg-white rounded-2xl shadow-lg p-4 lg:p-6 mt-4">
           <button
             onClick={handlePreviousPage}
