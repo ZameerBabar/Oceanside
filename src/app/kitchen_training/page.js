@@ -76,7 +76,7 @@ export default function BackOfHouseTraining() {
   if (trainingContent.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>Firebase mein 'kitchen_training' collection mein koi data nahi mila.</p>
+        <p>Firebase mein &apos;kitchen_training&apos; collection mein koi data nahi mila.</p>
       </div>
     );
   }

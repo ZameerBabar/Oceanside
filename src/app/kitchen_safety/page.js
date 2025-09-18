@@ -59,7 +59,7 @@ export default function KitchenSafety() {
   if (safetyContent.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p>No safety data found. Please add data to the 'kitchen_safety' collection in Firebase.</p>
+        <p>No safety data found. Please add data to the &apos;kitchen_safety&apos; collection in Firebase.</p>
       </div>
     );
   }
