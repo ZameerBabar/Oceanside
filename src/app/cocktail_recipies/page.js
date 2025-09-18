@@ -3,81 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, Search, X } from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/app/firebaseConfig'; // Apni firebase config file ka path confirm kar lein
 
-const drinksData = [
-    {
-        id: 'bloody_mary_works',
-        name: 'Bloody Mary (The Works)',
-        glassware: 'Pint Glass',
-        garnish: 'Lemon Wedge, Lime Wedge, Green Olive, Celery Stick, 2 Shrimp, 1 Slice Bacon, Ground Black Pepper',
-        ingredients: ['3 oz Vodka (guest’s choice)', 'Zing Zang Bloody Mary Mix (to fill glass)'],
-        method: ['Fill a pint glass with ice.', 'Add vodka.', 'Top with Zing Zang to fill glass.', 'Shake ingredients together, then pour back into the pint glass.', 'Garnish with lemon wedge, lime wedge, green olive, celery stick, two shrimp, one slice of bacon.', 'Finish with a sprinkle of freshly ground black pepper.'],
-        image: 'https://media.istockphoto.com/id/1307546222/photo/mojito-cocktail-with-lime-and-mint.jpg?s=612x612&w=0&k=20&c=gHx_HqT6b_zREkORePVRJaDbibixhtjbO1rncgKUGOQ='
-    },
-    {
-        id: 'blue_hawaiian',
-        name: 'Blue Hawaiian',
-        glassware: 'Pint Glass',
-        garnish: 'Orange Slice, Maraschino Cherry',
-        ingredients: ['0.75 oz Grey Goose Vodka', '0.75 oz Bacardi Rum', '0.5 oz Blue Curaçao', '3 oz Pineapple Juice', '1 oz Sour Mix'],
-        method: ['Add all ingredients to a shaker with ice.', 'Shake well and pour into a pint glass.', 'Garnish with an orange slice and maraschino cherry.'],
-        image: 'https://www.shutterstock.com/image-photo/lemonade-mojito-cocktail-lemon-mint-260nw-662695249.jpg'
-    },
-    {
-        id: 'coconut_lemonade',
-        name: 'Coconut Lemonade',
-        glassware: 'Pint Glass',
-        garnish: 'Lemon Wheel',
-        ingredients: ['2 oz Bacardi Coconut Rum', '1 oz Pineapple Juice', '2 oz Lemonade', '1 oz Sprite'],
-        method: ['Add all ingredients to a shaker with ice.', 'Roll between shaker and pint glass to mix.', 'Pour into pint glass.', 'Garnish with a lemon wheel.'],
-        image: 'https://foodal.com/wp-content/uploads/2022/06/Mint-Lime-Ginger-Splash.jpg'
-    },
-    {
-        id: 'espresso_martini',
-        name: 'Espresso Martini',
-        glassware: 'Martini Glass',
-        garnish: '3 Coffee Beans',
-        ingredients: ['1.5 oz Cantera Negra Tequila', '1 oz 360 Vanilla Vodka', '0.5 oz Five Farms Irish Cream', '1 oz Finest Call Espresso Mix'],
-        method: ['Add all ingredients to a shaker with ice.', 'Shake well until chilled.', 'Strain into a martini glass.', 'Float three coffee beans on top for garnish.'],
-        image: 'https://static01.nyt.com/images/2021/05/16/multimedia/16ah-mintdrinks/16ah-mintdrinks-articleLarge.jpg?quality=75&auto=webp&disable=upscale'
-    },
-    {
-        id: 'grapefruit_pomegranate',
-        name: 'Grapefruit Pomegranate',
-        glassware: 'Highball Glass (Salt Rim)',
-        garnish: 'Lime Slice',
-        ingredients: ['1 oz Cazadores Tequila', '0.75 oz Pama Pomegranate Liqueur', '0.25 oz Lime Juice', '3 oz Grapefruit Juice'],
-        method: ['Rim a highball glass with salt.', 'Add all ingredients to a shaker with ice.', 'Shake well and pour into the prepared glass.', 'Garnish with a lime slice.'],
-        image: 'https://thumbs.dreamstime.com/b/strawberry-lemonade-cocktail-ice-mint-glass-strawberry-lemonade-cocktail-ice-mint-glass-gray-stone-123213960.jpg'
-    },
-    {
-        id: 'hemingways_painkiller',
-        name: 'Hemingway’s Painkiller',
-        glassware: 'Pint Glass',
-        garnish: 'Orange Slice, Maraschino Cherry, Dash of Cinnamon',
-        ingredients: ['1.5 oz Pilar Blonde Rum', '0.5 oz Pilar Dark Rum (floater)', '0.5 oz Island Oasis Piña Colada Mix', '1.5 oz Pineapple Juice', '1.5 oz Orange Juice'],
-        method: ['Add all ingredients except Pilar Dark Rum into a shaker with ice.', 'Shake well and pour into a pint glass.', 'Float the Pilar Dark Rum on top.', 'Garnish with an orange slice, maraschino cherry, and a dash of cinnamon.'],
-        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhcuInwojHyj8DetK1lrql4vIp_ZnKnXgLVg&s'
-    },
-    {
-        id: 'key_lime_colada',
-        name: 'Key Lime Colada',
-        glassware: 'Goblet',
-        garnish: 'Whipped Cream & Lime Wedge',
-        ingredients: ['2 oz Bacardi Lime Rum', '5 oz Island Oasis Piña Colada Mix', '1 Large Scoop of Ice'],
-        method: ['Rim goblet glass with graham cracker crumbles.', 'Add rum, piña colada mix, and ice into blender cup.', 'Blend on first setting for one drink.', 'Pour into prepared goblet.', 'Garnish with whipped cream and lime wedge.'],
-        image: 'https://c8.alamy.com/comp/2F4PF1Y/closeup-vertical-shot-of-a-strawberry-being-dropped-into-a-glass-of-water-and-causing-a-splash-2F4PF1Y.jpg'
-    },
-    {
-        id: 'mango_jalapeno_margarita',
-        name: 'Mango Jalapeño Margarita',
-        glassware: 'Goblet',
-        garnish: 'Lime Slice & Jalapeño Slice',
-        ingredients: ['1.5 oz Patrón Tequila', '0.5 oz Patrón Citrónage', '4–5 Fresh Jalapeño Slices', '1 oz Island Oasis Mango', '1 oz Sour Mix', '1 oz Fresh Lime Juice'],
-        method: ['Rim goblet with chamoy and Tajín.', 'Add jalapeño slices to shaker and muddle.', 'Add remaining ingredients and ice to shaker.', 'Shake well and pour into prepared goblet.', 'Garnish with lime slice and jalapeño slice.'],
-        image: 'https://www.thescramble.com/wp-content/uploads/2022/07/flavored-water-inside-vertical.800.jpg.webp'
-    },
-];
 
 const DrinkCard = ({ drink, onClick, isSelected }) => (
     <div
@@ -120,7 +48,7 @@ const DrinkDetail = ({ drink, onClose }) => {
             />
             <h2 className="text-3xl font-bold text-[#1E4D2B] mb-2">{drink.name}</h2>
             <p className="text-gray-600 mb-4">
-                <span className="font-semibold text-gray-800">Glassware:</span> {drink.glassware}
+                    <span className="font-semibold text-gray-800">Glassware:</span> {drink.glassware}
             </p>
             {drink.garnish && (
                 <p className="text-gray-600 mb-4">
@@ -147,16 +75,43 @@ export default function BartenderHubScreen() {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedDrink, setSelectedDrink] = useState(null);
+    const [drinksData, setDrinksData] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDrinksData = async () => {
+            setLoading(true);
+            try {
+                const querySnapshot = await getDocs(collection(db, 'cocktail_recipes'));
+                const fetchedData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setDrinksData(fetchedData);
+                if (fetchedData.length > 0) {
+                    setSelectedDrink(fetchedData[0]);
+                }
+            } catch (error) {
+                console.error("Error fetching cocktail recipes: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDrinksData();
+    }, []);
 
     const filteredDrinks = drinksData.filter(drink =>
         drink.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    useEffect(() => {
-        if (filteredDrinks.length > 0 && !selectedDrink) {
-            setSelectedDrink(filteredDrinks[0]);
-        }
-    }, [filteredDrinks, selectedDrink]);
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                <p>Data loading ho raha hai...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#34916aff] to-[#38c755ff] p-4 font-sans">
