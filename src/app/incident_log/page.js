@@ -21,6 +21,9 @@ const App = () => {
   const [statusEdit, setStatusEdit] = useState('');
   const [followUpEdit, setFollowUpEdit] = useState('');
 
+  // Naya state for inline description edit
+  const [editingDescriptionId, setEditingDescriptionId] = useState(null);
+
   const incidentTypes = ['Guest Complaint', 'Staff Injury', 'Maintenance'];
   const statusOptions = ['Open', 'In Progress', 'Closed'];
 
@@ -82,6 +85,19 @@ const App = () => {
       setFollowUpEdit('');
     } catch (error) {
       console.error('Error updating incident: ', error);
+    }
+  };
+
+  // Naya function sirf description update karne ke liye
+  const handleDescriptionUpdate = async (incidentId, newDescriptionText) => {
+    try {
+      const incidentRef = doc(db, 'IncidentLog', incidentId);
+      await updateDoc(incidentRef, {
+        description: newDescriptionText
+      });
+      setEditingDescriptionId(null);
+    } catch (error) {
+      console.error('Error updating description: ', error);
     }
   };
 
@@ -152,7 +168,31 @@ const App = () => {
                     </div>
                   </td>
 
-                  <td className="py-3 px-4">{incident.description}</td>
+                  {/* ✅ Updated Description cell with inline edit */}
+                  <td className="py-3 px-4">
+                    <div className="flex items-center space-x-2">
+                      {editingDescriptionId === incident.id ? (
+                        <textarea
+                          defaultValue={incident.description}
+                          onBlur={(e) => handleDescriptionUpdate(incident.id, e.target.value)}
+                          className="w-full p-2 border rounded"
+                          rows="2"
+                          autoFocus
+                        />
+                      ) : (
+                        <>
+                          <span>{incident.description}</span>
+                          <button
+                            onClick={() => setEditingDescriptionId(incident.id)}
+                            className="text-gray-500 hover:text-green-600"
+                          >
+                            ✏️
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                  
                   <td className="py-3 px-4">{incident.reportedBy}</td>
                   <td className="py-3 px-4">{incident.followUp}</td>
                 </tr>

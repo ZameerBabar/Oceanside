@@ -135,7 +135,7 @@ const tasks = {
         "Expo marker to mark open tables",
         "Pen and watch to write down wait times",
         "Clipboard with pages for wait list",
-        "Kids’ menus and crayons underneath",
+        "Kids menus and crayons underneath",
         "To-Go menus underneath for customers"
       ]
     },
