@@ -77,23 +77,23 @@ export default function HubPage() {
 
   const hostHubData = {
     title: "Host/Hostess Hub",
-    description: "Your all-in-one resource for seating charts, training guides, and shift notes to keep the front of house running smoothly.",
+    description: "Your one-stop resource for seating charts, training guides, and checklists to keep the front of house organized, efficient, and guest-ready.",
     cards: [
       {
         title: "Sidework Checklists",
-        description: "access and complete the sidework checklists",
+        description: "Stay on top of opening, closing, and shift duties with easy-to-follow checklists.",
         imageSrc: "https://www.phly.com/CMSImages/BackgroundChecksBlogBanner-1440x40736-21390.jpg",
         altText: "A seating chart diagram"
       },
       {
         title: "Seating Chart",
-        description: "View the resturent seating layout",
-        imageSrc: "https://i.etsystatic.com/43809202/r/il/a7d240/6588095837/il_fullxfull.6588095837_ji2l.jpg",
+        description: "Quickly view and manage the restaurant’s seating layout for smooth service flow.",
+        imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FSeating%20Chart.jpg?alt=media&token=9aa58b1c-9515-4526-aef5-476f73959d20",
         altText: "A training manual"
       },
       {
         title: "Host Training Manual",
-        description: " Training Modules for host and hostess",
+        description: "Access step-by-step training modules designed to help hosts and hostesses succeed.",
         imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FTeam%20Photo.jpg?alt=media&token=d00cbbe0-6de4-4537-926e-f98de1bd732d",
         altText: "A notebook with shift notes"
       }
