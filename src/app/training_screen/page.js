@@ -203,6 +203,9 @@ const cookHubData = {
     else if (cardTitle === "Host Training Manual") {
       router.push('/host_training');
     }
+    else if (cardTitle === "Sidework Checklists") {
+      router.push('/sidework_list');
+    }
   };
 
   // Jab tak role load nahi hota, loading screen dikhayen.
