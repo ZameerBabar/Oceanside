@@ -127,10 +127,10 @@ const DashboardPage = () => {
             {/* Ab file ka naam check kiya ja raha hai taake sahi message dikhe */}
             {selectedDocument.name.endsWith('.docx') ? (
               <div className="w-full h-full flex flex-col items-center justify-center p-4">
-                <h3 className="text-xl font-semibold mb-2" style={{ color: themeColors.textDark }}>File open nahi ho rahi</h3>
+                <h3 className="text-xl font-semibold mb-2" style={{ color: themeColors.textDark }}>The file is not opening.</h3>
                 <p className="text-center text-sm" style={{ color: themeColors.textLight }}>
-                  Yeh file .docx format mein hai, isliye yeh seedhe browser mein open nahi ho sakti.
-                  Ise download karne ke liye download icon par click karen.
+                 This file is in docx format, so it cannot be opened directly in a browser.
+                  Click the download icon to download it.
                 </p>
               </div>
             ) : (

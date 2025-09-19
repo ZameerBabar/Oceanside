@@ -369,7 +369,7 @@ const FirebaseReviewReport = () => {
                         <span className="font-bold text-[#194D33]">{review.reviewer_name}</span>
                         <Pill text={review.platform} color="#1E4D2B" />
                       </div>
-                      <div className="flex">{getRatingStars(review.rating || 3)}</div>
+                     
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{review.review_text}</p>
                     <Pill text={review.location} color="#A3C7B5" />
