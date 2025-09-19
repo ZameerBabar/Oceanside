@@ -14,6 +14,7 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
+  updateDoc,
 } from 'firebase/firestore';
 
 const App = () => {
@@ -25,6 +26,16 @@ const App = () => {
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [userId, setUserId] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
+
+  // New states for editing tasks
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [editDescription, setEditDescription] = useState('');
+  const [editAssignee, setEditAssignee] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [completedByName, setCompletedByName] = useState('');
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
+  const [taskToComplete, setTaskToComplete] = useState(null);
 
   const teamMembers = ['Tony', 'Anna', 'Johnny', 'Dan'];
 
@@ -80,8 +91,8 @@ const App = () => {
         ? 'Today'
         : selectedDate ===
           new Date(Date.now() + 86400000).toISOString().split('T')[0]
-        ? 'Tomorrow'
-        : new Date(newDueDate).toLocaleDateString();
+          ? 'Tomorrow'
+          : new Date(newDueDate).toLocaleDateString();
 
     const newTodoTask = {
       description: newTask,
@@ -106,23 +117,89 @@ const App = () => {
     }
   };
 
-  // ✅ Complete Task (MOVE to History)
-  const handleTaskCompletion = async (taskId) => {
-    const task = tasks.find((t) => t.id === taskId);
-    if (!task) return;
+  // ✅ Handle Edit Click
+  const handleEditClick = (task) => {
+    setEditingTask(task);
+    setEditDescription(task.description);
+    setEditAssignee(task.assignee);
+    setEditDueDate(
+      task.dueDate === 'Today' || task.dueDate === 'Tomorrow'
+        ? ''
+        : new Date(task.dueDate).toISOString().split('T')[0]
+    );
+    setEditModalOpen(true);
+  };
+
+  // ✅ Update Task & Log to History
+  const handleUpdateTask = async () => {
+    if (!editingTask) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const selectedDate = new Date(editDueDate).toISOString().split('T')[0];
+    let displayDueDate = editDueDate;
+
+    if (editDueDate) {
+      if (selectedDate === today) {
+        displayDueDate = 'Today';
+      } else if (selectedDate === new Date(Date.now() + 86400000).toISOString().split('T')[0]) {
+        displayDueDate = 'Tomorrow';
+      } else {
+        displayDueDate = new Date(editDueDate).toLocaleDateString();
+      }
+    } else {
+      displayDueDate = editingTask.dueDate;
+    }
+  
+    try {
+      const taskRef = doc(db, 'Manager Task', editingTask.id);
+      await updateDoc(taskRef, {
+        description: editDescription,
+        assignee: editAssignee,
+        dueDate: displayDueDate,
+        lastUpdated: new Date().toLocaleDateString(),
+      });
+
+      // Add to History
+      await addDoc(collection(db, 'History'), {
+        description: `Task updated: "${editingTask.description}" to "${editDescription}"`,
+        lastUpdated: new Date().toLocaleDateString(),
+        type: 'Updated',
+        updatedBy: 'Manager', // Temporarily using 'Manager'
+      });
+
+      setEditModalOpen(false);
+      setEditingTask(null);
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
+  };
+
+  // ✅ Handle Completion Prompt
+  const handleCompletionPrompt = (task) => {
+    setTaskToComplete(task);
+    setCompleteModalOpen(true);
+  };
+
+  // ✅ Complete Task & Log to History
+  const handleTaskCompletion = async () => {
+    if (!taskToComplete) return;
 
     try {
       // Step 1: Add to History
       await addDoc(collection(db, 'History'), {
-        ...task,
+        ...taskToComplete,
         status: 'Completed',
         lastUpdated: new Date().toLocaleDateString(),
         completedAt: serverTimestamp(),
-        type: 'Completed',
+        type: 'Completed by ' + (completedByName || 'Anonymous'),
       });
 
       // Step 2: Remove from Manager Task
-      await deleteDoc(doc(db, 'Manager Task', taskId));
+      await deleteDoc(doc(db, 'Manager Task', taskToComplete.id));
+
+      setCompleteModalOpen(false);
+      setTaskToComplete(null);
+      setCompletedByName('');
     } catch (error) {
       console.error('Error completing task:', error);
     }
@@ -135,7 +212,7 @@ const App = () => {
   return (
     <div className="flex flex-col min-h-screen font-sans bg-gradient-to-br from-[#34916aff] to-[#d4edc9] items-center">
       {/* Header */}
-      <header className="bg-gradient-to-r from-green-600 to-teal-500 text-white  shadow-lg p-6 mb-6 w-full">
+      <header className="bg-gradient-to-r from-green-600 to-teal-500 text-white shadow-lg p-6 mb-6 w-full">
         <h1 className="text-3xl font-bold text-center">Manager Task Board</h1>
         <p className="text-sm text-center opacity-80">
           Create, assign, and track tasks for your team.
@@ -185,30 +262,37 @@ const App = () => {
 
           {/* Task Board */}
           <div className="flex-1 bg-white rounded-2xl shadow-md p-6">
-            <div className="grid grid-cols-4 gap-4 pb-2 border-b-2 border-gray-200 font-bold text-gray-700 text-sm">
-              <span>Task</span>
-              <span>Assigned to</span>
-              <span>Due date</span>
-              <span>Last updated</span>
+            <div className="grid grid-cols-5 gap-4 pb-2 border-b-2 border-gray-200 font-bold text-gray-700 text-sm">
+              <span className="col-span-1">Task</span>
+              <span className="col-span-1">Assigned to</span>
+              <span className="col-span-1">Due date</span>
+              <span className="col-span-1">Last updated</span>
+              <span className="col-span-1">Actions</span>
             </div>
             <div className="mt-4 space-y-3">
               {tasks.length > 0 ? (
                 tasks.map((task) => (
                   <div
                     key={task.id}
-                    className="grid grid-cols-4 gap-4 items-center text-sm border-b py-2"
+                    className="grid grid-cols-5 gap-4 items-center text-sm border-b py-2"
                   >
-                    <div className="flex items-center">
+                    <div className="flex items-center col-span-1">
                       <input
                         type="checkbox"
                         className="mr-2"
-                        onChange={() => handleTaskCompletion(task.id)}
+                        onChange={() => handleCompletionPrompt(task)}
                       />
                       <span>{task.description}</span>
                     </div>
                     <span>{task.assignee}</span>
                     <span>{task.dueDate}</span>
                     <span>{task.lastUpdated}</span>
+                    <button
+                      onClick={() => handleEditClick(task)}
+                      className="text-gray-500 hover:text-green-600"
+                    >
+                      ✏️
+                    </button>
                   </div>
                 ))
               ) : (
@@ -236,6 +320,102 @@ const App = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Task Modal */}
+      {editModalOpen && editingTask && (
+        <div className="fixed inset-0 bg-gradient-to-br from-[#34916aff] to-[#d4edc9] bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
+            <h2 className="text-2xl font-bold mb-4 text-green-700">Edit Task</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <input
+                  type="text"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Assignee</label>
+                <select
+                  value={editAssignee}
+                  onChange={(e) => setEditAssignee(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  {teamMembers.map((member) => (
+                    <option key={member} value={member}>
+                      {member}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Due Date</label>
+                <input
+                  type="date"
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  min={today}
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                type="button"
+                onClick={() => setEditModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateTask}
+                className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Complete Task Modal */}
+      {completeModalOpen && taskToComplete && (
+        <div className="fixed inset-0 bg-gradient-to-br from-[#34916aff] to-[#d4edc9] bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
+            <h2 className="text-2xl font-bold mb-4 text-green-700">Complete Task</h2>
+            <p className="mb-4">Task: **{taskToComplete.description}**</p>
+            <div>
+              <label className="block text-sm font-medium mb-1">Completed by:</label>
+              <input
+                type="text"
+                value={completedByName}
+                onChange={(e) => setCompletedByName(e.target.value)}
+                placeholder="Your name"
+                className="w-full p-2 border rounded-md"
+              />
+            </div>
+            <div className="flex justify-end space-x-4 mt-6">
+              <button
+                type="button"
+                onClick={() => setCompleteModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleTaskCompletion}
+                className="px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700"
+              >
+                Confirm Complete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
