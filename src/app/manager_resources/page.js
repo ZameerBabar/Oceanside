@@ -24,30 +24,30 @@ const DashboardPage = () => {
     {
       title: 'Storm & Emergency Procedures',
       items: [
-        { name: 'Hurricane Shut Down Procedures.docx', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Resources%2FHurricane%20Shut%20Down%20Procedures.docx?alt=media&token=eca505b1-0c65-4639-ad24-32cad167a017' },
-        { name: 'Storm Preparedness Checklist.docx', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Resources%2FStorm%20Preparedness%20Checklist.docx?alt=media&token=e5d53cc4-9b3e-4317-914a-553e4d1156f6' },
+        { name: 'Hurricane Shut Down Procedures.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/manager_resources%2FHurricane%20Shut%20Down%20Procedures%20pdf.pdf?alt=media&token=2447186f-6a3e-4b8b-8e87-e03aec4d39c4' },
+        { name: 'Storm Preparedness Checklist.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/manager_resources%2FStorm%20Preparedness%20Checklist.pdf?alt=media&token=92ad89d1-5cce-4da6-992e-e99e3ed33a09' },
       ],
     },
     {
       title: 'Private Events & Banquets',
       items: [
-        { name: 'Private Events Menu 2025.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Resources%2FPrivate%20Events%20Menu%202025.pdf?alt=media&token=4979c881-1b8c-4381-8c34-6ba8d3cbb043' },
-        { name: 'FAQ Banquets.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Resources%2FFAQ%20Banquets.pdf?alt=media&token=44436a0c-b30e-4f1f-9bbe-1bf8ea5a35dd' },
+        { name: 'Private Events Menu 2025.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/manager_resources%2FPrivate%20Events%20Menu%202025.pdf?alt=media&token=35014b9c-2204-4a57-90e8-72c167c8f278' },
+        { name: 'FAQ Banquets.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/manager_resources%2FFAQ%20Banquets.pdf?alt=media&token=67e04816-83d8-4a31-ba5d-fc1d9799b9cd' },
       ],
       isTwoColumn: true,
     },
     {
       title: 'Guest Services & Payments',
       items: [
-        { name: 'Accepting Old Gift Cards.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Resources%2FAccepting%20Old%20Gift%20Cards.pdf?alt=media&token=a84ee756-84d1-429b-b0e9-c768c4fd239c' },
+        { name: 'Accepting Old Gift Cards.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/manager_resources%2FAccepting%20Old%20Gift%20Cards.pdf?alt=media&token=fbdfc4e7-7da3-4b02-92fd-74a5c1e93b6b' },
       ],
       isTwoColumn: false,
     },
     {
       title: 'Manager Operations Checklists',
       items: [
-        { name: 'FOH Manager Closing.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Resources%2FFOH%20Manager%20Closing-2.pdf?alt=media&token=a6337a43-99ae-4739-85a1-47ad72eddb19' },
-        { name: 'Close Out Day, Z Report, and Auto-Capture Overview.docx', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Resources%2FClose%20Out%20Day%2C%20Z%20Report%2C%20and%20Auto-Capture%20Overview.docx?alt=media&token=3e2e3fc1-bda0-4e56-96d8-f70d2623d9d9' },
+        { name: 'FOH Manager Closing.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/manager_resources%2FFOH%20Manager%20Closing-2.pdf?alt=media&token=5807eb9c-d1a8-4a99-9f40-599382994d1a' },
+        { name: 'Close Out Day, Z Report, and Auto-Capture Overview.pdf', link: 'https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/manager_resources%2FClose%20Out%20Day%2C%20Z%20Report%2C%20and%20Auto-Capture%20Overview%20.pdf?alt=media&token=65389f8a-d922-4aa4-b2e6-d095caf599d6' },
       ],
       isTwoColumn: true,
     },
