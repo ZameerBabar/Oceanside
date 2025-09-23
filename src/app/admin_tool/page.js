@@ -56,7 +56,7 @@ const AdminToolsScreen = () => {
             title="User Records"
             description="Browse employee profiles, certifications, and performance records in one place."
             icon={<Users />}
-            onClick={() => router.push('/user_records')}
+            onClick={() => router.push('/employee_record')}
             className="hover:shadow-green-500/50"
             iconClassName="bg-gradient-to-br from-green-500 to-indigo-600"
             buttonText="See Records"
