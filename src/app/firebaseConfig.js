@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,10 +13,21 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app);
 
+// ✅ All required Cloud Functions for your app
+const createEmployeeFunction = httpsCallable(functions, 'createEmployee');
+const activateEmployeeFunction = httpsCallable(functions, 'activateEmployee');
+const deleteEmployeeFunction = httpsCallable(functions, 'deleteEmployee');
+const resendInviteFunction = httpsCallable(functions, 'resendInvite');
+
+// Additional functions (from your original code)
+const deleteUserAndDataFunction = httpsCallable(functions, 'deleteUserAndData');
+const updateUserStatusFunction = httpsCallable(functions, 'updateUserStatus');
+
+// Enable offline persistence
 enableIndexedDbPersistence(db).catch((err) => {
   if (err.code === 'failed-precondition') {
     console.warn("Offline persistence can only be enabled in one tab at a time.");
@@ -24,4 +36,17 @@ enableIndexedDbPersistence(db).catch((err) => {
   }
 });
 
-export { auth, db, firebaseConfig };
+export { 
+  auth, 
+  db, 
+  functions,
+  // Required functions for add_user/page.js
+  createEmployeeFunction,
+  activateEmployeeFunction,
+  deleteEmployeeFunction,
+  resendInviteFunction,
+  // Additional functions
+  deleteUserAndDataFunction, 
+  updateUserStatusFunction,
+  firebaseConfig 
+};
