@@ -190,22 +190,22 @@ const EmployeeRecord = () => {
     return (
         <div className="flex min-h-screen bg-green-50 font-sans">
             {/* Left Column: Employee List */}
-            <div className="w-64 flex-shrink-0 bg-gradient-to-br from-[#34916aff] to-[#d4edc9] shadow-xl overflow-y-auto p-4 border-r border-gray-200">
-               
+            <div className="w-64 flex-shrink-0 bg-gradient-to-br from-green-700 to-green-200 shadow-xl overflow-y-auto p-4 border-r">
+                <h2 className="text-2xl font-bold mb-6 text-white">Employees</h2>
                 <ul className="space-y-3">
                     {employees.map(employee => (
                         <li
                             key={employee.id}
                             onClick={() => handleSelectEmployee(employee)}
                             className={`p-3 rounded-xl cursor-pointer transition-colors flex items-center space-x-3
-                            ${selectedEmployee?.id === employee.id ? 'bg-green-100 text-green-800 font-semibold' : 'hover:bg-gray-100 text-gray-700'}`}
+                            ${selectedEmployee?.id === employee.id ? 'bg-green-100 text-green-800 font-semibold' : 'hover:bg-green-600 hover:bg-opacity-20 text-white'}`}
                         >
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-200 text-lg font-bold text-gray-600">
+                            <div className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center bg-gray-200 text-lg font-bold text-gray-600">
                                 {employee.name?.charAt(0).toUpperCase()}
                             </div>
                             <div className="flex-1">
                                 <p className="text-md">{employee.name}</p>
-                                <p className="text-xs opacity-70">{employee.role}</p>
+                                <p className="text-xs opacity-80">{employee.role}</p>
                             </div>
                         </li>
                     ))}
@@ -213,7 +213,7 @@ const EmployeeRecord = () => {
             </div>
 
             {/* Right Column: Employee Record Details */}
-            <div className="flex-1 p-8 bg-gradient-to-br from-green-800 to-green-200">
+            <div className="flex-1 p-8 bg-gradient-to-br from-green-600 to-green-200"> {/* Adjusted gradient here */}
                 {feedback.message && (
                     <div className={`p-4 mb-4 rounded-xl font-medium ${feedback.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                         {feedback.message}
@@ -222,7 +222,7 @@ const EmployeeRecord = () => {
                 {selectedEmployee ? (
                     <div className="space-y-6">
                         {/* Header Section */}
-                        <div className="bg-gradient-to-br from-green-500 to-emerald-400 text-white rounded-2xl shadow-lg p-6 flex items-center space-x-6">
+                        <div className="border-2 border-white bg-gradient-to-br from-green-700 to-emerald-400 text-white rounded-2xl shadow-lg p-6 flex items-center space-x-6">
                             {getProfileAvatar(selectedEmployee.name)}
                             <div>
                                 <h1 className="text-3xl font-extrabold">{selectedEmployee.name}</h1>
@@ -274,7 +274,7 @@ const EmployeeRecord = () => {
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">Full Disciplinary Log</h2>
                             <button
                                 onClick={() => setShowDisciplinaryForm(!showDisciplinaryForm)}
-                                className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl mb-4 transition-colors text-sm"
+                                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl mb-4 transition-colors text-sm"
                             >
                                 {showDisciplinaryForm ? 'Cancel' : 'Add New Entry'}
                             </button>
@@ -352,7 +352,7 @@ const EmployeeRecord = () => {
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full">
-                        <p className="text-gray-500 text-xl">Select an employee from the list to view their record.</p>
+                        <p className="text-white text-xl">Select an employee from the list to view their record.</p>
                     </div>
                 )}
             </div>
