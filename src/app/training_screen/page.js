@@ -86,7 +86,7 @@ export default function HubPage() {
         altText: "A seating chart diagram"
       },
       {
-        title: "Seating Chart",
+        title: "Seating Layout",
         description: "Quickly view and manage the restaurant’s seating layout for smooth service flow.",
         imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FSeating%20Chart.jpg?alt=media&token=9aa58b1c-9515-4526-aef5-476f73959d20",
         altText: "A training manual"
@@ -181,6 +181,9 @@ const cookHubData = {
     }
     else if (cardTitle === "Seating Chart") {
       router.push('/seating_chat_server');
+    }
+    else if (cardTitle === "Seating Layout") {
+      router.push('/seating_layout');
     }
      else if (cardTitle === "Cocktail & Drink Recipes") {
       router.push('/cocktail_recipies');
