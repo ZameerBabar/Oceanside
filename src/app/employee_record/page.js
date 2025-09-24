@@ -40,6 +40,20 @@ const EmployeeRecord = () => {
         );
     };
 
+    // Helper function to handle date formatting for both Firestore Timestamps and JS Date objects
+    const formatDate = (date) => {
+        if (!date) return '';
+        // Check if the date object has the toDate method (Firestore Timestamp)
+        if (typeof date.toDate === 'function') {
+            return date.toDate().toLocaleDateString();
+        }
+        // Otherwise, assume it's a JavaScript Date object
+        if (date instanceof Date) {
+            return date.toLocaleDateString();
+        }
+        return new Date(date).toLocaleDateString();
+    };
+
     useEffect(() => {
         const fetchEmployees = async () => {
             setLoading(true);
@@ -259,7 +273,7 @@ const EmployeeRecord = () => {
                                         <div key={index} className="border-b pb-3 mb-3 last:border-0 last:pb-0">
                                             <div className="flex justify-between items-center mb-1">
                                                 <p className="text-sm font-medium text-gray-800">{log.note}</p>
-                                                <span className="text-xs text-gray-400">{log.date?.toDate().toLocaleDateString()}</span>
+                                                <span className="text-xs text-gray-400">{formatDate(log.date)}</span>
                                             </div>
                                         </div>
                                     ))
@@ -315,7 +329,7 @@ const EmployeeRecord = () => {
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {selectedEmployee.disciplinaryLogs.map(log => (
                                                 <tr key={log.id} className="hover:bg-gray-50 transition-colors">
-                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{log.date?.toDate().toLocaleDateString()}</td>
+                                                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{formatDate(log.date)}</td>
                                                     <td className="px-4 py-3">
                                                         {isEditingNote && editNoteId === log.id ? (
                                                             <textarea
