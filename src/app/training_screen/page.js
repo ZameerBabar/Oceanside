@@ -4,40 +4,25 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Firebase imports
-// Yahan path ko theek kar diya gaya hai.
-// Ab yeh do levels upar ja kar 'firebaseConfig' file ko dhoondega.
 import { auth } from '../firebaseConfig'; 
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
-// Yeh component user ke role ke mutabiq alag-alag hub ka content dikhayega.
 export default function HubPage() {
   const router = useRouter();
 
-  // User ka role aur loading state ko manage karne ke liye state variables.
-  const [userRole, setUserRole] = useState(null);
+  // User authentication state
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-
-  // Firestore database ka reference.
-  const db = getFirestore();
+  // Role passed from URL parameter
+  const [currentRole, setCurrentRole] = useState(null);
+  // Manager view state
+  const [isManagerView, setIsManagerView] = useState(false);
 
   useEffect(() => {
-    // onAuthStateChanged listener jo user login state ko track karta hai.
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    // Check user authentication
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        // Agar user login hai, to unka role Firestore se fetch karein.
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (userDocSnap.exists()) {
-          // Document milne par role ko state mein save karein.
-          const userData = userDocSnap.data();
-          setUserRole(userData.role);
-        } else {
-          // Agar user ka document nahi mila, to default role set kar sakte hain ya error dikha sakte hain.
-          console.error("User role document not found for:", user.uid);
-          setUserRole('Server'); // Default role
-        }
+        setUserAuthenticated(true);
         setLoading(false);
       } else {
         // Agar user logged out hai, to unko login page par bhej dein.
@@ -45,9 +30,33 @@ export default function HubPage() {
       }
     });
 
-    // Cleanup function: jab component unmount hoga to listener ko remove kar dega.
     return () => unsubscribe();
-  }, [router, db]);
+  }, [router]);
+
+  // Get role from URL parameters
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roleParam = urlParams.get('role');
+      const isManager = urlParams.get('isManager') === 'true';
+      
+      if (roleParam) {
+        setCurrentRole(roleParam);
+        setIsManagerView(isManager);
+      } else {
+        // Check if user came from dashboard (referrer check)
+        const referrer = document.referrer;
+        if (referrer && referrer.includes('/dashboard')) {
+          // Agar dashboard se aaya hai but role parameter nahi hai, 
+          // to dashboard par wapas bhej do
+          router.push('/dashboard');
+        } else {
+          // Agar kahan se aaya pata nahi to team hub screen par bhej do
+          router.push('/team-hubs');
+        }
+      }
+    }
+  }, [router]);
 
   // Fake data for different roles.
   const serverHubData = {
@@ -87,7 +96,7 @@ export default function HubPage() {
       },
       {
         title: "Seating Layout",
-        description: "Quickly view and manage the restaurant’s seating layout for smooth service flow.",
+        description: "Quickly view and manage the restaurant's seating layout for smooth service flow.",
         imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FSeating%20Chart.jpg?alt=media&token=9aa58b1c-9515-4526-aef5-476f73959d20",
         altText: "A training manual"
       },
@@ -100,8 +109,7 @@ export default function HubPage() {
     ]
   };
 
-
-const cookHubData = {
+  const cookHubData = {
     title: "Kitchen Hub",
     description: "Your all-in-one resource for seating charts, training guides, and shift notes to keep the front of house running smoothly.",
     cards: [
@@ -126,8 +134,6 @@ const cookHubData = {
     ]
   };
 
-
-
   const bartenderHubData = {
     title: "Bartender Hub",
     description: "Your all-in-one resource for drink recipes, manuals, menu knowledge, and shift notes.",
@@ -147,7 +153,7 @@ const cookHubData = {
       {
         title: "Menu Training",
         description: "Food offerings and bar cocktails with photos and ingredients.",
-        imageSrc: "https://www.refrigeratedfrozenfood.com/ext/resources/NEW_RD_Website/DefaultImages/default-pasta.jpg?1430942591",
+        imageSrc: "https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Menu_Item%2FBreakfast%2FStuffed%20French%20Toast.png?alt=media&token=54724791-e4cd-419c-85c4-9e8064f2de65",
         altText: "Plates of food and drinks on a table"
       },
       {
@@ -159,60 +165,70 @@ const cookHubData = {
     ]
   };
 
+  // Function to handle going back to team hubs
+  const handleBackToTeamHubs = () => {
+    router.push('/team-hubs');
+  };
+
   // User ke role ke hisaab se sahi data chunna.
   let currentHubData = null;
-  if (userRole === 'Host') {
+
+  if (currentRole === 'Host') {
     currentHubData = hostHubData;
-  } else if (userRole === 'Bartender') {
+  } else if (currentRole === 'Bartender') {
     currentHubData = bartenderHubData;
-  } else if (userRole === 'Server') {
+  } else if (currentRole === 'Server') {
     currentHubData = serverHubData;
-  } else if (userRole === 'Cook'){
-     currentHubData = cookHubData;
+  } else if (currentRole === 'Cook'){
+    currentHubData = cookHubData;
   }
 
   const handleCardClick = (cardTitle) => {
     console.log(`Card "${cardTitle}" was clicked!`);
+    
+    // Pass current role and manager status to all navigation pages
+    const urlParams = `?role=${currentRole}&isManager=${isManagerView}`;
+    
     // Example navigation logic
     if (cardTitle === "Menu Training") {
-      router.push('/menu_guide');
+      router.push(`/menu_guide${urlParams}`);
     } else if (cardTitle === "Server Training Manual") {
-      router.push('/server_training');
+      router.push(`/server_training${urlParams}`);
     }
     else if (cardTitle === "Seating Chart") {
-      router.push('/seating_chat_server');
+      router.push(`/seating_chat_server${urlParams}`);
     }
     else if (cardTitle === "Seating Layout") {
-      router.push('/seating_layout');
+      router.push(`/seating_layout${urlParams}`);
     }
      else if (cardTitle === "Cocktail & Drink Recipes") {
-      router.push('/cocktail_recipies');
+      router.push(`/cocktail_recipies${urlParams}`);
     }
      else if (cardTitle === "Bartender Training Manual") {
-      router.push('/bartender_training');
+      router.push(`/bartender_training${urlParams}`);
     }
     else if (cardTitle === "Recipe Library") {
-      router.push('/recipe_library');
+      router.push(`/recipe_library${urlParams}`);
     }
      else if (cardTitle === "Kitchen Safety") {
-      router.push('/kitchen_safety');
+      router.push(`/kitchen_safety${urlParams}`);
     }
      else if (cardTitle === "Kitchen Training Manual") {
-      router.push('/kitchen_training');
+      router.push(`/kitchen_training${urlParams}`);
     }
       else if (cardTitle === "Shift Notes") {
-      router.push('/shift_note');
+      router.push(`/shift_note${urlParams}`);
     }
     else if (cardTitle === "Host Training Manual") {
-      router.push('/host_training');
+      router.push(`/host_training${urlParams}`);
     }
     else if (cardTitle === "Sidework Checklists") {
-      router.push('/sidework_list');
+      router.push(`/sidework_list${urlParams}`);
     }
   };
 
-  // Jab tak role load nahi hota, loading screen dikhayen.
-  if (loading || !currentHubData) {
+  // Jab tak authentication check nahi hoti, loading screen dikhayen.
+  if (loading || !userAuthenticated || !currentHubData) {
     return (
       <div className="flex h-screen w-screen items-center justify-center font-sans">
         <div className="text-xl font-bold text-gray-700">Loading Hub...</div>
@@ -227,6 +243,23 @@ const cookHubData = {
       }}
     >
       <div className="max-w-6xl w-full">
+        {/* Manager View Banner */}
+        {isManagerView && (
+          <div className="bg-blue-600 text-white p-4 rounded-lg mb-6 text-center shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <span className="font-semibold">Manager View: Currently viewing {currentRole} Hub</span>
+              </div>
+              <button
+                onClick={handleBackToTeamHubs}
+                className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Back to Team Hubs
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Hub Title aur Description section */}
         <div className="text-center p-8 mb-8 rounded-xl shadow-lg"
           style={{

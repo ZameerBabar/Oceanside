@@ -11,6 +11,23 @@ export default function ServerTraining() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
   const [user, setUser] = useState(null);
+  
+  // CHANGE 1: URL parameters aur manager data ke liye state variables
+  const [currentRole, setCurrentRole] = useState(null);
+  const [isManagerView, setIsManagerView] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+
+  // CHANGE 2: URL parameters check karne ke liye useEffect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const roleParam = urlParams.get('role');
+      const isManager = urlParams.get('isManager') === 'true';
+      
+      setCurrentRole(roleParam);
+      setIsManagerView(isManager);
+    }
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -23,37 +40,61 @@ export default function ServerTraining() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [currentRole, isManagerView]); // Add dependencies
 
+  // CHANGE 3: Updated fetchUserRoleAndTraining function
   const fetchUserRoleAndTraining = async (currentUser) => {
     try {
-      // First fetch user role from users collection
-      const userDocRef = doc(db, "users", currentUser.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      let role, userName;
       
-      if (!userDocSnap.exists()) {
-        console.log("User document not found!");
-        setLoading(false);
-        return;
+      // Manager view logic
+      if (isManagerView && currentRole) {
+        // Agar manager view hai to URL se role le kar manager data fetch karo
+        const managerDocRef = doc(db, "managers", currentUser.uid);
+        const managerDocSnap = await getDoc(managerDocRef);
+        
+        if (managerDocSnap.exists()) {
+          userName = managerDocSnap.data().name || 'Manager';
+          role = currentRole; // URL se role use karo
+        } else {
+          console.log("Manager document not found!");
+          setLoading(false);
+          return;
+        }
+      } else {
+        // Normal user logic - employees collection se fetch karo
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (!userDocSnap.exists()) {
+          console.log("User document not found!");
+          setLoading(false);
+          return;
+        }
+
+        const userData = userDocSnap.data();
+        role = userData.role;
+        userName = userData.name || 'Employee';
       }
-
-      const userData = userDocSnap.data();
-      const role = userData.role; // Get role from user document
+      
       setUserRole(role);
+      setDisplayName(userName);
 
-      // Now fetch training data based on role
+      // Now fetch training data based on determined role
       let trainingDocRef, dataField;
       
-      if (role === "Server") { // Note: case-sensitive match with your Firestore data
+      if (role === "Server") {
         trainingDocRef = doc(db, "Full Server Training", "data");
         dataField = "serverTraining";
-      } else if (role === "Bartender") { // Note: case-sensitive match with your Firestore data
+      } else if (role === "Bartender") {
         trainingDocRef = doc(db, "Full Bartender Training", "data");
         dataField = "bartenderTraining";
-      }
-      else if (role === "Host") { // Note: case-sensitive match with your Firestore data
+      } else if (role === "Host") {
         trainingDocRef = doc(db, "Full Host Training", "data");
         dataField = "HostTraining";
+      } else if (role === "Cook") { // Add Cook role support
+        trainingDocRef = doc(db, "Full Cook Training", "data");
+        dataField = "cookTraining";
       } else {
         console.log("Unknown role:", role);
         setLoading(false);
@@ -65,7 +106,7 @@ export default function ServerTraining() {
       if (trainingDocSnap.exists()) {
         setTrainingData(trainingDocSnap.data()[dataField] || []);
       } else {
-        console.log("Training document not found!");
+        console.log("Training document not found for role:", role);
         setTrainingData([]);
       }
     } catch (error) {
@@ -98,18 +139,45 @@ export default function ServerTraining() {
   if (trainingData.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center bg-gradient-to-br from-green-100 to-green-600">
-        <p className="text-xl text-green-800">No training data found.</p>
+        <div className="text-center">
+          {/* CHANGE 4: Manager view banner */}
+          {isManagerView && currentRole && (
+            <div className="bg-blue-600 text-white p-3 rounded-lg mb-4">
+              <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Training</span>
+            </div>
+          )}
+          <p className="text-xl text-green-800">No training data found for {userRole} role.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen flex-col">
+      {/* CHANGE 5: Manager View Banner */}
+      {isManagerView && currentRole && (
+        <div className="w-full bg-blue-600 text-white p-3 text-center">
+          <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Training Guide</span>
+          <button
+            onClick={() => router.push(`/hub?role=${currentRole}&isManager=true`)}
+            className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
+          >
+            Back to Hub
+          </button>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10 overflow-y-auto bg-gradient-to-br from-green-100 to-green-600">
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8 max-w-7xl mx-auto">
+          {/* CHANGE 6: Dynamic title with display name */}
           <h1 className="text-3xl font-bold text-green-800 mb-8">
             Oceanside Beach Bar & Grill — {userRole} Training Guide
+            {isManagerView && (
+              <div className="text-lg font-normal text-green-600 mt-2">
+                Viewing as: {displayName}
+              </div>
+            )}
           </h1>
 
           <div className="space-y-8">

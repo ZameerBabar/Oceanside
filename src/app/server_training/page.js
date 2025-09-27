@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, Check, PlusCircle, Award, Star, Lock, Trophy, Zap } from 'lucide-react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-// Removed 'import PracticalCheckScreen from ../practical_check/page' because it's not needed for routing.
 import { db } from '@/app/firebaseConfig';
 
 const TOTAL_TRAINING_DAYS = 6;
@@ -15,27 +14,66 @@ export default function ServerTrainingPage() {
     const [user, setUser] = useState(null);
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
+    
+    // URL parameters se role aur manager status
+    const [currentRole, setCurrentRole] = useState(null);
+    const [isManagerView, setIsManagerView] = useState(false);
+    
+    // Manager ka data alag se store karne ke liye
+    const [managerData, setManagerData] = useState(null);
+
+    useEffect(() => {
+        // URL parameters check karo
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleParam = urlParams.get('role');
+            const isManager = urlParams.get('isManager') === 'true';
+            
+            setCurrentRole(roleParam);
+            setIsManagerView(isManager);
+        }
+    }, []);
 
     const handleStartClick = () => {
-        router.push('/ful_server_training');
+        const urlParams = currentRole ? `?role=${currentRole}&isManager=${isManagerView}` : '';
+        router.push(`/ful_server_training${urlParams}`);
     };
 
     const handleDayClick = (day) => {
-        router.push(`/server_training_day?day=${day}`);
+        const urlParams = currentRole ? `?day=${day}&role=${currentRole}&isManager=${isManagerView}` : `?day=${day}`;
+        router.push(`/server_training_day${urlParams}`);
     };
 
     const handleQuizClick = (quiz) => {
-        const isPassed = userData?.[`quiz_${quiz}_passed`];
-        const isApproved = userData?.[`approved_quiz_${quiz}`];
+        // MANAGER VIEW: Manager ke document se quiz status check karo
+        if (isManagerView && currentRole && managerData) {
+            const prefix = currentRole.toLowerCase() + '_';
+            const isPassed = managerData[`${prefix}quiz_${quiz}_passed`];
+            const isApproved = managerData[`${prefix}approved_quiz_${quiz}`];
+            const urlParams = currentRole ? `&role=${currentRole}&isManager=${isManagerView}` : '';
 
-        // This is the updated logic:
-        // Redirect to PracticalCheckScreen if quiz is passed but NOT approved
-        if (isPassed && !isApproved && (quiz === 2 || quiz === 3 || quiz === 4)) {
-            router.replace(`/practical_check?quiz=${quiz}`);
+            if (isPassed && !isApproved && (quiz === 2 || quiz === 3 || quiz === 4)) {
+                router.replace(`/practical_check?quiz=${quiz}${urlParams}`);
+            } else {
+                router.replace(`/quiz_screen?quiz=${quiz}${urlParams}`);
+            }
         } else {
-            // Otherwise, go to the regular quiz screen
-            router.replace(`/quiz_screen?quiz=${quiz}`);
+            // NORMAL EMPLOYEE: Employee ke document se quiz status check karo
+            const isPassed = userData?.[`quiz_${quiz}_passed`];
+            const isApproved = userData?.[`approved_quiz_${quiz}`];
+            const urlParams = currentRole ? `&role=${currentRole}&isManager=${isManagerView}` : '';
+
+            if (isPassed && !isApproved && (quiz === 2 || quiz === 3 || quiz === 4)) {
+                router.replace(`/practical_check?quiz=${quiz}${urlParams}`);
+            } else {
+                router.replace(`/quiz_screen?quiz=${quiz}${urlParams}`);
+            }
         }
+    };
+
+    const handleSeatingChartClick = () => {
+        const urlParams = currentRole ? `?role=${currentRole}&isManager=${isManagerView}` : '';
+        router.replace(`/seating_chat_server${urlParams}`);
     };
 
     useEffect(() => {
@@ -43,16 +81,38 @@ export default function ServerTrainingPage() {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 setUser(currentUser);
-                const userDocRef = doc(db, 'users', currentUser.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    setUserData(userDocSnap.data());
-                } else {
+                
+                // CHANGE 1: Manager aur employee data dono fetch karo
+                try {
+                    // Pehle 'users' collection check karo (employees)
+                    const userDocRef = doc(db, 'users', currentUser.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    
+                    if (userDocSnap.exists()) {
+                        // Employee data mila
+                        setUserData(userDocSnap.data());
+                    } else {
+                        // Agar users collection mein nahi mila, to managers collection check karo
+                        const managerDocRef = doc(db, 'managers', currentUser.uid);
+                        const managerDocSnap = await getDoc(managerDocRef);
+                        
+                        if (managerDocSnap.exists()) {
+                            // Manager data mila
+                            setManagerData(managerDocSnap.data());
+                            setUserData({}); // Empty userData for manager
+                        } else {
+                            // Koi data nahi mila
+                            setUserData({});
+                        }
+                    }
+                } catch (error) {
+                    console.error("Firestore se data fetch karne mein error:", error);
                     setUserData({});
                 }
             } else {
                 setUser(null);
                 setUserData(null);
+                setManagerData(null);
             }
             setLoading(false);
         });
@@ -60,6 +120,20 @@ export default function ServerTrainingPage() {
     }, []);
 
     const getCompletedDays = () => {
+        // MANAGER VIEW: Manager ke document se progress fetch karo
+        if (isManagerView && currentRole && managerData) {
+            const prefix = currentRole.toLowerCase() + '_';
+            let completed = 0;
+            for (let i = 1; i <= TOTAL_TRAINING_DAYS; i++) {
+                const fieldName = `${prefix}training_day_${i}`;
+                if (managerData[fieldName]) {
+                    completed++;
+                }
+            }
+            return completed;
+        }
+        
+        // NORMAL EMPLOYEE: Employee ke document se progress fetch karo
         if (!userData) return 0;
         let completed = 0;
         for (let i = 1; i <= TOTAL_TRAINING_DAYS; i++) {
@@ -70,15 +144,68 @@ export default function ServerTrainingPage() {
         return completed;
     };
 
+    // CHANGE 2: Display name logic update - manager ka actual name show karo
+    const getDisplayName = () => {
+        if (isManagerView && currentRole) {
+            // Agar manager view hai to manager ka name show karo
+            return managerData?.name || 'Manager';
+        }
+        // Normal employee ka name show karo
+        return userData?.name || 'Guest';
+    };
+
     const completedDays = getCompletedDays();
     const readyForDay = completedDays + 1;
+    
     const isDayClickable = (day) => {
+        // MANAGER VIEW: Manager ke document se check karo
+        if (isManagerView && currentRole && managerData) {
+            if (day === 1) return true;
+            const prefix = currentRole.toLowerCase() + '_';
+            const prevDayField = `${prefix}training_day_${day - 1}`;
+            return managerData[prevDayField] !== undefined;
+        }
+        
+        // NORMAL EMPLOYEE: Employee ke document se check karo
         if (day === 1) return true;
         return userData?.[`training_day_${day - 1}`] !== undefined;
     };
-    const completedQuizCount = Object.keys(userData || {}).filter(key => key.startsWith('quiz_') && userData[key]).length;
+    
+    const getCompletedQuizCount = () => {
+        // MANAGER VIEW: Manager ke document se quiz count fetch karo
+        if (isManagerView && currentRole && managerData) {
+            const prefix = currentRole.toLowerCase() + '_';
+            return Object.keys(managerData).filter(key => 
+                key.startsWith(`${prefix}quiz_`) && key.endsWith('_passed') && managerData[key]
+            ).length;
+        }
+        
+        // NORMAL EMPLOYEE: Employee ke document se quiz count fetch karo
+        return Object.keys(userData || {}).filter(key => key.startsWith('quiz_') && userData[key]).length;
+    };
+    
+    const completedQuizCount = getCompletedQuizCount();
 
     const isQuizClickable = (quiz) => {
+        // MANAGER VIEW: Manager ke document se quiz eligibility check karo
+        if (isManagerView && currentRole && managerData) {
+            const prefix = currentRole.toLowerCase() + '_';
+            if (quiz === 1) {
+                return true;
+            }
+            if (quiz === 2) {
+                return managerData[`${prefix}quiz_1_passed`];
+            }
+            if (quiz === 3) {
+                return managerData[`${prefix}approved_quiz_2`];
+            }
+            if (quiz === 4) {
+                return managerData[`${prefix}approved_quiz_3`];
+            }
+            return false;
+        }
+        
+        // NORMAL EMPLOYEE: Employee ke document se quiz eligibility check karo
         if (quiz === 1) {
             return true;
         }
@@ -104,6 +231,19 @@ export default function ServerTrainingPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center font-sans bg-white relative">
+            {/* Manager View Banner */}
+            {isManagerView && currentRole && (
+                <div className="w-full bg-blue-600 text-white p-3 text-center z-20 relative">
+                    <span className="font-semibold">Manager View: Currently viewing {currentRole} Training</span>
+                    <button
+                        onClick={() => router.push('/hub?role=' + currentRole + '&isManager=true')}
+                        className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
+                    >
+                        Back to Hub
+                    </button>
+                </div>
+            )}
+
             {/* Top Section with Background Image */}
             <div
                 className="w-full h-[500px] bg-cover bg-top"
@@ -118,7 +258,7 @@ export default function ServerTrainingPage() {
 
                 {/* Header Section */}
                 <div className="text-white text-left mb-6 drop-shadow-lg">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-2">Welcome back, {userData?.name || 'Guest'}!</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-2">Welcome back, {getDisplayName()}!</h1>
                     <h2 className="text-3xl md:text-4xl font-bold mb-2">Ready for Day {readyForDay}?</h2>
                     <p className="text-lg md:text-xl font-light">
                         Master all aspects of serving—with comprehensive lessons and progress quizzes.
@@ -157,8 +297,19 @@ export default function ServerTrainingPage() {
                                 <div className="flex flex-wrap gap-2">
                                     {[...Array(TOTAL_TRAINING_DAYS)].map((_, index) => {
                                         const day = index + 1;
-                                        const isCompleted = userData?.[`training_day_${day}`] !== undefined;
-                                        const clickable = isDayClickable(day);
+                                        
+                                        // MANAGER VIEW: Manager ke document se completion check karo
+                                        let isCompleted, clickable;
+                                        if (isManagerView && currentRole && managerData) {
+                                            const prefix = currentRole.toLowerCase() + '_';
+                                            const dayField = `${prefix}training_day_${day}`;
+                                            isCompleted = managerData[dayField] !== undefined;
+                                        } else {
+                                            // EMPLOYEE VIEW: Employee ke document se completion check karo
+                                            isCompleted = userData?.[`training_day_${day}`] !== undefined;
+                                        }
+                                        
+                                        clickable = isDayClickable(day);
 
                                         return (
                                             <button
@@ -187,8 +338,19 @@ export default function ServerTrainingPage() {
                                 <div className="flex flex-wrap gap-2">
                                     {[...Array(TOTAL_QUIZZES)].map((_, index) => {
                                         const quiz = index + 1;
-                                        const isCompleted = userData?.[`quiz_${quiz}_passed`] !== undefined;
-                                        const clickable = isQuizClickable(quiz);
+                                        
+                                        // MANAGER VIEW: Manager ke document se quiz completion check karo
+                                        let isCompleted, clickable;
+                                        if (isManagerView && currentRole && managerData) {
+                                            const prefix = currentRole.toLowerCase() + '_';
+                                            const quizField = `${prefix}quiz_${quiz}_passed`;
+                                            isCompleted = managerData[quizField] !== undefined;
+                                        } else {
+                                            // EMPLOYEE VIEW: Employee ke document se quiz completion check karo
+                                            isCompleted = userData?.[`quiz_${quiz}_passed`] !== undefined;
+                                        }
+                                        
+                                        clickable = isQuizClickable(quiz);
 
                                         return (
                                             <button
@@ -230,7 +392,7 @@ export default function ServerTrainingPage() {
                                 <h2 className="text-xl font-semibold text-gray-800 mb-4">Seating Chart</h2>
                                 <div className="space-y-3">
                                     <button
-                                        onClick={() => router.replace('/seating_chat_server')}
+                                        onClick={handleSeatingChartClick}
                                         className="w-full flex items-center justify-between bg-blue-100 text-blue-800 font-medium py-3 px-4 rounded-lg hover:bg-blue-200">
                                         <div className="flex items-center gap-2">
                                             <Trophy size={18} />

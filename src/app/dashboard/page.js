@@ -125,9 +125,9 @@ const DashboardPage = () => {
       description: hubCardData.description,
       icon: hubCardData.icon,
       onClick: () => {
-        console.log(`${hubCardData.title} clicked`);
-        // Yahan aapko role-specific routing set karna hoga agar zaroori hai
-        router.push('/training_screen');
+    console.log(`${hubCardData.title} clicked`);
+    // Normal employee ke liye direct hub page par bhejo with role parameter
+    router.push(`/training_screen?role=${userRole}&isManager=false`);
       },
     },
     {

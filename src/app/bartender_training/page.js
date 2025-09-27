@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, Check, PlusCircle, Award, Star, Lock, Trophy, Zap } from 'lucide-react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
-
 import { db } from '@/app/firebaseConfig';
 
 const TOTAL_TRAINING_DAYS = 4;
@@ -17,49 +16,125 @@ export default function BartenderTrainingPage() {
     const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // CHANGE 1: URL parameters aur manager data ke liye state variables add karo
+    const [currentRole, setCurrentRole] = useState(null);
+    const [isManagerView, setIsManagerView] = useState(false);
+    const [managerData, setManagerData] = useState(null);
+
+    // CHANGE 2: URL parameters check karne ke liye useEffect add karo
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleParam = urlParams.get('role');
+            const isManager = urlParams.get('isManager') === 'true';
+            
+            setCurrentRole(roleParam);
+            setIsManagerView(isManager);
+        }
+    }, []);
+
+    // CHANGE 3: Navigation functions mein URL parameters pass karo
     const handleStartClick = () => {
-        router.push('/ful_server_training');
+        // Sirf woh params pass karein jo already set hain
+        const urlParams = currentRole ? `?role=${currentRole}${isManagerView ? '&isManager=true' : ''}` : '';
+        router.push(`/ful_server_training${urlParams}`);
     };
 
     const handleDayClick = (day) => {
-        router.push(`/server_training_day?day=${day}`);
+        const urlParams = currentRole ? `&role=${currentRole}${isManagerView ? '&isManager=true' : ''}` : '';
+        router.push(`/server_training_day?day=${day}${urlParams}`);
     };
 
     const handleQuizClick = (quiz) => {
-        router.replace(`/quiz_screen?quiz=${quiz}`);
+        const urlParams = currentRole ? `&role=${currentRole}${isManagerView ? '&isManager=true' : ''}` : '';
+        router.replace(`/quiz_screen?quiz=${quiz}${urlParams}`);
     };
 
+    // **UPDATED CHANGE 4: Data fetching logic jo aapne bataya hai uske mutabiq**
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 setUser(currentUser);
-                const userDocRef = doc(db, 'users', currentUser.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    const data = userDocSnap.data();
-                    setUserData(data);
-                    setUserRole(data.role || 'Server'); // Default to Server if no role
-                } else {
+                
+                try {
+                    // Agar Manager View hai, to managers collection check karein
+                    if (isManagerView) {
+                        const managerDocRef = doc(db, 'managers', currentUser.uid);
+                        const managerDocSnap = await getDoc(managerDocRef);
+                        
+                        if (managerDocSnap.exists()) {
+                            // Manager ka data mil gaya (manager khud log in hai)
+                            // Progress manager ke document se show karein
+                            const data = managerDocSnap.data();
+                            setUserData(data); 
+                            setManagerData(data); // Manager ka apna data bhi store kar liya
+                            setUserRole('Bartender'); // Current viewing role hardcoded
+                        } else {
+                            // Manager data nahi mila
+                            setUserData({});
+                            setManagerData(null);
+                            setUserRole('Bartender');
+                        }
+                    } 
+                    // Agar Manager View nahi hai, to users collection check karein (Default Employee/User)
+                    else {
+                        const userDocRef = doc(db, 'users', currentUser.uid);
+                        const userDocSnap = await getDoc(userDocRef);
+                        
+                        if (userDocSnap.exists()) {
+                            // Employee data mila
+                            const data = userDocSnap.data();
+                            setUserData(data);
+                            setUserRole(data.role || 'Bartender');
+                            setManagerData(null); // Manager data clear
+                        } else {
+                            // Agar users collection mein nahi mila (ho sakta hai woh manager ho, lekin isManagerView off ho)
+                            // Ya koi aur issue ho, isliye default set kar diya
+                            setUserData({});
+                            setUserRole('Bartender'); 
+                            setManagerData(null);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Firestore se data fetch karne mein error:", error);
                     setUserData({});
-                    setUserRole('Server');
+                    setUserRole('Bartender');
+                    setManagerData(null);
                 }
             } else {
                 setUser(null);
                 setUserData(null);
                 setUserRole(null);
+                setManagerData(null);
             }
             setLoading(false);
         });
         return () => unsubscribe();
-    }, []);
+    }, [isManagerView]); // isManagerView par depend karega taake state change hone par re-fetch ho
+    // **UPDATED CHANGE 4 END**
+
+    // CHANGE 5: Display name function update karo
+    const getDisplayName = () => {
+        // Agar isManagerView true hai, to manager ka naam dikhao
+        if (isManagerView) {
+            return managerData?.name || 'Manager';
+        }
+        // Warna, employee ka naam dikhao
+        return userData?.name || 'Guest';
+    };
 
     const getCompletedDays = () => {
         if (!userData || !userRole) return 0;
         let completed = 0;
+        // isManagerView hone par bhi userData hi use hoga
         for (let i = 1; i <= TOTAL_TRAINING_DAYS; i++) {
-            const fieldName = userRole === 'Bartender' ? `bartender_training_day_${i}` : `training_day_${i}`;
-            if (userData[fieldName]) {
+            // Hum Bartender training page par hain, isliye Bartender prefix use karenge (ya jo role set hai)
+            const prefix = userRole === 'Bartender' ? 'bartender_training_day_' : 'training_day_';
+            const fieldName = `${prefix}${i}`;
+            
+            // Ab userData mein Manager ka data hoga agar isManagerView true hai
+            if (userData[fieldName]) { 
                 completed++;
             }
         }
@@ -71,8 +146,10 @@ export default function BartenderTrainingPage() {
     
     const isDayClickable = (day) => {
         if (day === 1) return true;
-        const prevDayField = userRole === 'Bartender' ? `bartender_training_day_${day - 1}` : `training_day_${day - 1}`;
-        return userData?.[prevDayField] !== undefined;
+        const prefix = userRole === 'Bartender' ? 'bartender_training_day_' : 'training_day_';
+        const prevDayField = `${prefix}${day - 1}`;
+        // Ab yeh check userData par hoga, jismein Manager ka data hoga agar isManagerView true hai
+        return userData?.[prevDayField] !== undefined; 
     };
 
     const getCompletedQuizCount = () => {
@@ -88,20 +165,13 @@ export default function BartenderTrainingPage() {
     const isQuizClickable = (quiz) => {
         if (!userRole) return false;
         
-        if (quiz === 1) {
-            return true;
-        }
-        if (quiz === 2) {
-            const quiz1Field = userRole === 'Bartender' ? 'bartender_quiz_1_passed' : 'quiz_1_passed';
-            return userData?.[quiz1Field];
-        }
-        if (quiz === 3) {
-            const quiz2Field = userRole === 'Bartender' ? 'bartender_quiz_2_passed' : 'quiz_2_passed';
-            return userData?.[quiz2Field];
-        }
-        if (quiz === 4) {
-            const quiz3Field = userRole === 'Bartender' ? 'bartender_quiz_3_passed' : 'quiz_3_passed';
-            return userData?.[quiz3Field];
+        // isManagerView mein bhi userData hi use hoga
+        const prefix = userRole === 'Bartender' ? 'bartender_quiz_' : 'quiz_';
+
+        if (quiz === 1) return true;
+        if (quiz > 1) {
+             const prevQuizField = `${prefix}${quiz - 1}_passed`;
+             return userData?.[prevQuizField] || false;
         }
         return false;
     };
@@ -109,7 +179,8 @@ export default function BartenderTrainingPage() {
     const isQuizCompleted = (quiz) => {
         if (!userRole) return false;
         const passedField = userRole === 'Bartender' ? `bartender_quiz_${quiz}_passed` : `quiz_${quiz}_passed`;
-        return userData?.[passedField] !== undefined;
+        // isManagerView mein bhi userData hi use hoga
+        return userData?.[passedField] !== undefined; 
     };
 
     if (loading) {
@@ -122,6 +193,19 @@ export default function BartenderTrainingPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center font-sans bg-white relative">
+            {/* CHANGE 6: Manager View Banner add karo */}
+            {isManagerView && (
+                <div className="w-full bg-blue-600 text-white p-3 text-center z-20 relative">
+                    <span className="font-semibold">Manager View: Currently viewing Bartender Training</span>
+                    <button
+                        onClick={() => router.push('/hub?role=' + currentRole + '&isManager=true')}
+                        className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
+                    >
+                        Back to Hub
+                    </button>
+                </div>
+            )}
+
             {/* Top Section with Background Image */}
             <div
                 className="w-full h-[500px] bg-cover bg-top"
@@ -134,9 +218,9 @@ export default function BartenderTrainingPage() {
             {/* Main Content Container */}
             <div className="w-full max-w-6xl z-10 p-4 md:p-8 -mt-64 relative">
 
-                {/* Header Section */}
+                {/* CHANGE 7: Header Section mein getDisplayName() use karo */}
                 <div className="text-white text-left mb-6 drop-shadow-lg">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-2">Welcome back, {userData?.name || 'Guest'}!</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-2">Welcome back, {getDisplayName()}!</h1>
                     <h2 className="text-3xl md:text-4xl font-bold mb-2">Ready for Day {readyForDay}?</h2>
                     <p className="text-lg md:text-xl font-light">
                         Master all aspects of {userRole === 'Bartender' ? 'bartending' : 'serving'}—with comprehensive lessons and progress quizzes.
@@ -152,7 +236,7 @@ export default function BartenderTrainingPage() {
                                 Full {userRole} Training
                             </h2>
                             <p className="text-gray-100 mt-1">
-                               The complete guide covering every step of Oceanside&apos;s {userRole === 'Bartender' ? 'bartending' : 'service'} process.
+                                The complete guide covering every step of Oceanside&apos;s {userRole === 'Bartender' ? 'bartending' : 'service'} process.
                             </p>
 
                             {/* Progress Bar */}

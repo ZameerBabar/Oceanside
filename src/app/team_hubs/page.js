@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChefHat, Coffee, Handshake, Utensils, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const ModernCard = ({ title, description, icon, onClick, className = '', iconClassName = '' }) => (
   <div
@@ -26,7 +27,16 @@ const ModernCard = ({ title, description, icon, onClick, className = '', iconCla
   </div>
 );
 
-const TeamHubsScreen = () => {
+const TeamHubsScreen = ({ userRole = 'Manager' }) => {
+  const router = useRouter();
+
+  const handleRoleClick = (role) => {
+    // Check if user is Manager to show manager view banner
+    const isManager = userRole === 'Manager';
+    // Hub page par navigate karo with role parameter
+    router.push(`/training_screen?role=${role}&isManager=${isManager}`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#34916aff] to-[#d4edc9] p-10 font-sans flex items-center justify-center">
       <div className="w-full max-w-6xl">
@@ -44,7 +54,7 @@ const TeamHubsScreen = () => {
             title="Server Hub"
             description="Training, menu knowledge, service standards, and customer interaction scenarios."
             icon={<Handshake />}
-            onClick={() => {}}
+            onClick={() => handleRoleClick('Server')}
             className="hover:shadow-green-500/50"
             iconClassName="bg-gradient-to-br from-green-500 to-sky-600"
           />
@@ -52,7 +62,7 @@ const TeamHubsScreen = () => {
             title="Bartender Hub"
             description="Cocktail recipes, bar procedures, compliance checks, and upselling strategies."
             icon={<Coffee />}
-            onClick={() => {}}
+            onClick={() => handleRoleClick('Bartender')}
             className="hover:shadow-green-500/50"
             iconClassName="bg-gradient-to-br from-green-500 to-indigo-600"
           />
@@ -60,7 +70,7 @@ const TeamHubsScreen = () => {
             title="Host/Hostess Hub"
             description="Reservation flow, seating charts, guest communication guidelines, and customer service scripts."
             icon={<Utensils />}
-            onClick={() => {}}
+            onClick={() => handleRoleClick('Host')}
             className="hover:shadow-green-500/50"
             iconClassName="bg-gradient-to-br from-green-500 to-teal-600"
           />
@@ -68,7 +78,7 @@ const TeamHubsScreen = () => {
             title="Kitchen Hub"
             description="Batch recipes, prep standards, food safety protocols, and storage guidelines."
             icon={<ChefHat />}
-            onClick={() => {}}
+            onClick={() => handleRoleClick('Cook')}
             className="hover:shadow-green-500/50"
             iconClassName="bg-gradient-to-br from-green-500 to-orange-600"
           />

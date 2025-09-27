@@ -28,20 +28,70 @@ export default function QuizScreen() {
     const [loading, setLoading] = useState(true);
     const [selectedQuiz, setSelectedQuiz] = useState(null);
 
+    // CHANGE 1: Manager view ke liye state variables
+    const [currentRole, setCurrentRole] = useState(null);
+    const [isManagerView, setIsManagerView] = useState(false);
+    const [displayName, setDisplayName] = useState('');
+    const [isManager, setIsManager] = useState(false);
+
+    // CHANGE 2: URL parameters check karne ke liye useEffect
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roleParam = urlParams.get('role');
+            const isManagerParam = urlParams.get('isManager') === 'true';
+            
+            setCurrentRole(roleParam);
+            setIsManagerView(isManagerParam);
+        }
+    }, []);
+
+    // CHANGE 3: Updated authentication and data fetching
     useEffect(() => {
         const auth = getAuth();
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (currentUser) {
                 setUser(currentUser);
                 
-                // Fetch user role
-                const userDocRef = doc(db, 'users', currentUser.uid);
-                const userDocSnap = await getDoc(userDocRef);
-                if (userDocSnap.exists()) {
-                    setUserRole(userDocSnap.data().role || 'Server');
+                let role, userName, userIsManager = false;
+                
+                // Manager view logic
+                if (isManagerView && currentRole) {
+                    // Manager collection se data fetch karo
+                    const managerDocRef = doc(db, "managers", currentUser.uid);
+                    const managerDocSnap = await getDoc(managerDocRef);
+                    
+                    if (managerDocSnap.exists()) {
+                        userName = managerDocSnap.data().name || 'Manager';
+                        role = currentRole; // URL se role use karo
+                        userIsManager = true;
+                        setDisplayName(userName);
+                        setIsManager(true);
+                    } else {
+                        console.error("Manager document not found!");
+                        setUserRole(null);
+                        setLoading(false);
+                        return;
+                    }
                 } else {
-                    setUserRole('Server');
+                    // Normal employee logic
+                    const userDocRef = doc(db, 'users', currentUser.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data();
+                        role = userData.role || 'Server';
+                        userName = userData.name || 'Employee';
+                        setDisplayName(userName);
+                        setIsManager(false);
+                    } else {
+                        role = 'Server';
+                        userName = 'Employee';
+                        setDisplayName(userName);
+                        setIsManager(false);
+                    }
                 }
+                
+                setUserRole(role);
             } else {
                 setUser(null);
                 router.push('/login');
@@ -49,7 +99,7 @@ export default function QuizScreen() {
             setLoading(false);
         });
         return () => unsubscribe();
-    }, [router]);
+    }, [router, currentRole, isManagerView]);
 
     useEffect(() => {
         const quizId = searchParams.get('quiz');
@@ -67,8 +117,10 @@ export default function QuizScreen() {
                 let collectionName = 'Server Training';
                 if (userRole === 'Bartender') {
                     collectionName = 'Bartender Training Quizes';
-                } else if (userRole === 'Host') { // Host role added here
+                } else if (userRole === 'Host') {
                     collectionName = 'Host Training Quizes';
+                } else if (userRole === 'Cook') {
+                    collectionName = 'Cook Training Quizes';
                 }
 
                 const docRef = doc(db, collectionName, `quiz${selectedQuiz}`);
@@ -113,23 +165,37 @@ export default function QuizScreen() {
         return Math.round((correct / questions.length) * 100);
     };
 
+    // CHANGE 4: Updated quiz submit logic for manager vs employee
     const handleQuizSubmit = async () => {
         const calculatedScore = calculateScore();
         setScore(calculatedScore);
         const passed = calculatedScore >= passThreshold;
 
         if (passed && user) {
-            const userDocRef = doc(db, 'users', user.uid);
+            let docRef, fieldName;
             
-            // Save based on role - Host role added here
-            let fieldName = `quiz_${selectedQuiz}_passed`;
-            if (userRole === 'Bartender') {
-                fieldName = `bartender_quiz_${selectedQuiz}_passed`;
-            } else if (userRole === 'Host') {
-                fieldName = `host_quiz_${selectedQuiz}_passed`;
+            // Manager vs Employee save logic
+            if (isManager) {
+                // Manager ka data managers collection mein save karo
+                docRef = doc(db, "managers", user.uid);
+                fieldName = `${userRole.toLowerCase()}_quiz_${selectedQuiz}_passed`;
+            } else {
+                // Employee ka data users collection mein save karo
+                docRef = doc(db, 'users', user.uid);
+                
+                // Role-based field name
+                if (userRole === 'Server') {
+                    fieldName = `quiz_${selectedQuiz}_passed`;
+                } else if (userRole === 'Bartender') {
+                    fieldName = `bartender_quiz_${selectedQuiz}_passed`;
+                } else if (userRole === 'Host') {
+                    fieldName = `host_quiz_${selectedQuiz}_passed`;
+                } else if (userRole === 'Cook') {
+                    fieldName = `cook_quiz_${selectedQuiz}_passed`;
+                }
             }
                 
-            await updateDoc(userDocRef, {
+            await updateDoc(docRef, {
                 [fieldName]: true,
             });
         }
@@ -142,13 +208,18 @@ export default function QuizScreen() {
         setShowAnswer(false);
     };
 
+    // CHANGE 5: Updated back button route logic
     const getBackButtonRoute = () => {
+        const urlParams = currentRole ? `?role=${currentRole}&isManager=${isManagerView}` : '';
+        
         if (userRole === 'Bartender') {
-            return '/bartender_training';
-        } else if (userRole === 'Host') { // Host role added here
-            return '/host_training';
+            return `/bartender_training${urlParams}`;
+        } else if (userRole === 'Host') {
+            return `/host_training${urlParams}`;
+        } else if (userRole === 'Cook') {
+            return `/cook_training${urlParams}`;
         } else {
-            return '/server_training';
+            return `/server_training${urlParams}`;
         }
     };
     
@@ -171,11 +242,24 @@ export default function QuizScreen() {
 
         return (
             <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-green-100 to-green-600 flex items-center justify-center font-inter">
-                <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden">
+                {/* CHANGE 6: Manager View Banner for Result Screen */}
+                {isManagerView && currentRole && (
+                    <div className="fixed top-0 left-0 w-full z-50">
+                        <div className="bg-blue-600 text-white p-3 text-center">
+                            <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Quiz {selectedQuiz}</span>
+                        </div>
+                    </div>
+                )}
+
+                <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden mt-16">
                     <div className={`p-8 text-center ${passed ? 'bg-emerald-100' : 'bg-rose-100'}`}>
                         <h1 className="text-3xl font-bold mb-4">
-                            {passed ? '🎉 Quiz Completed! 🎉' : '📝 Quiz Results'}
+                            {passed ? 'Quiz Completed!' : 'Quiz Results'}
                         </h1>
+                        {/* Show current user for manager view */}
+                        {isManagerView && (
+                            <p className="text-gray-600 mb-4">Viewing as: {displayName}</p>
+                        )}
                         <div className="flex justify-center items-center space-x-8">
                             <div className={`text-6xl font-bold ${passed ? 'text-emerald-600' : 'text-rose-600'}`}>
                                 {score}%
@@ -251,7 +335,6 @@ export default function QuizScreen() {
                                 >
                                     Try Again
                                 </button>
-                                
                             </>
                         )}
                     </div>
@@ -264,10 +347,29 @@ export default function QuizScreen() {
     if (!quizStarted) {
         return (
             <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-green-100 to-green-600 flex items-center justify-center font-inter">
-                <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden">
+                {/* CHANGE 7: Manager View Banner for Start Screen */}
+                {isManagerView && currentRole && (
+                    <div className="fixed top-0 left-0 w-full z-50">
+                        <div className="bg-blue-600 text-white p-3 text-center">
+                            <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Quiz {selectedQuiz}</span>
+                            <button
+                                onClick={() => router.push(getBackButtonRoute())}
+                                className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
+                            >
+                                Back to Training
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden mt-16">
                     <div className="p-8 text-white text-center" style={{ background: 'linear-gradient(135deg, #49a078, #a2cc8e)' }}>
                         <h1 className="text-3xl font-bold mb-2">{userRole} Training Quiz {selectedQuiz}</h1>
                         <p className="text-green-100">Test your knowledge with this interactive quiz</p>
+                        {/* Show current user for manager view */}
+                        {isManagerView && (
+                            <p className="text-green-200 mt-2">Viewing as: {displayName}</p>
+                        )}
                     </div>
                     <div className="p-8">
                         <div className="bg-green-50 p-6 rounded-xl mb-8">
@@ -314,7 +416,16 @@ export default function QuizScreen() {
     // Quiz Question Screen
     return (
         <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-green-100 to-green-600 flex items-center justify-center font-inter">
-            <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden">
+            {/* CHANGE 8: Manager View Banner for Question Screen */}
+            {isManagerView && currentRole && (
+                <div className="fixed top-0 left-0 w-full z-50">
+                    <div className="bg-blue-600 text-white p-3 text-center">
+                        <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Quiz {selectedQuiz}</span>
+                    </div>
+                </div>
+            )}
+
+            <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden mt-16">
                 {/* Progress Bar */}
                 <div className="h-2 bg-gray-200">
                     <div
