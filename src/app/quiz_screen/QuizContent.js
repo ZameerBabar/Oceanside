@@ -112,31 +112,58 @@ export default function QuizScreen() {
         if (!selectedQuiz || !userRole) return;
 
         const fetchQuizData = async () => {
+            setLoading(true); // Start loading when fetching begins
             try {
                 // Choose collection based on role
                 let collectionName = 'Server Training';
                 if (userRole === 'Bartender') {
                     collectionName = 'Bartender Training Quizes';
                 } else if (userRole === 'Host') {
-                    collectionName = 'Host Training Quizes';
+                    collectionName = 'Host Training Quizzes';
                 } else if (userRole === 'Cook') {
-                    collectionName = 'Cook Training Quizes';
+                    collectionName = 'Cook Training Quizzes';
                 }
+
+                console.log(`Fetching quiz data from: ${collectionName}, quiz${selectedQuiz}`); // Debug log
 
                 const docRef = doc(db, collectionName, `quiz${selectedQuiz}`);
                 const docSnap = await getDoc(docRef);
 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    console.log('Quiz data found:', data); // Debug log
                     setQuizData(data);
                     setQuestions(flattenQuestions(data.sections));
                 } else {
                     console.log(`No such document found for quiz${selectedQuiz} in ${collectionName}!`);
+                    
+                    // FALLBACK: Try Server Training if Host quiz not found
+                    if (userRole === 'Host') {
+                        console.log('Trying fallback to Server Training collection...');
+                        const fallbackDocRef = doc(db, 'Server Training', `quiz${selectedQuiz}`);
+                        const fallbackDocSnap = await getDoc(fallbackDocRef);
+                        
+                        if (fallbackDocSnap.exists()) {
+                            const fallbackData = fallbackDocSnap.data();
+                            console.log('Fallback quiz data found:', fallbackData);
+                            setQuizData(fallbackData);
+                            setQuestions(flattenQuestions(fallbackData.sections));
+                        } else {
+                            console.log('No fallback data found either');
+                            setQuizData(null);
+                            setQuestions([]);
+                        }
+                    } else {
+                        setQuizData(null);
+                        setQuestions([]);
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching quiz data:", error);
+                setQuizData(null);
+                setQuestions([]);
             } finally {
-                setLoading(false);
+                setLoading(false); // Stop loading when fetch completes
             }
         };
 
@@ -229,6 +256,26 @@ export default function QuizScreen() {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-600">
                 <p className="text-white text-xl">Loading quiz...</p>
+            </div>
+        );
+    }
+
+    // Show error message if no quiz data found
+    if (!quizData || questions.length === 0) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-600">
+                <div className="text-center bg-white p-8 rounded-2xl shadow-xl max-w-md">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Quiz Not Available</h2>
+                    <p className="text-gray-600 mb-6">
+                        Sorry, Quiz {selectedQuiz} for {userRole} role is not available at the moment.
+                    </p>
+                    <button
+                        onClick={() => router.push(getBackButtonRoute())}
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                    >
+                        Back to Training
+                    </button>
+                </div>
             </div>
         );
     }
@@ -440,7 +487,7 @@ export default function QuizScreen() {
                             Question {currentQuestion + 1} of {questions.length}
                         </div>
                         <div className="text-sm font-medium text-gray-500">
-                            {quizData.sections.find(s => s.questions.some(q => q.id === currentQ?.id))?.name}
+                            {quizData?.sections?.find(s => s.questions.some(q => q.id === currentQ?.id))?.name || 'Quiz Section'}
                         </div>
                     </div>
 
