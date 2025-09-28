@@ -149,17 +149,36 @@ const AIChatScreen = () => {
   };
 
   const renderMessageContent = (text) => {
+    // Image regex (existing)
     const imageRegex = /\((https?:\/\/[^\s]+?\.(jpg|jpeg|png|gif)(\?[^\s)]+)?)\)/gi;
+    
+    // Video regex (new) - detects mp4, webm, avi, mov, wmv video files
+    const videoRegex = /\((https?:\/\/[^\s]+?\.(mp4|webm|avi|mov|wmv)(\?[^\s)]+)?)\)/gi;
+    
     const parts = [];
     let lastIndex = 0;
     let match;
 
-    while ((match = imageRegex.exec(text)) !== null) {
+    // Create combined regex to find both images and videos
+    const combinedRegex = /\((https?:\/\/[^\s]+?\.(jpg|jpeg|png|gif|mp4|webm|avi|mov|wmv)(\?[^\s)]+)?)\)/gi;
+    
+    while ((match = combinedRegex.exec(text)) !== null) {
       if (match.index > lastIndex) {
         parts.push(text.substring(lastIndex, match.index));
       }
-      parts.push({ type: "image", url: match[1] });
-      lastIndex = imageRegex.lastIndex;
+      
+      const url = match[1];
+      const extension = match[2].toLowerCase();
+      
+      // Check if it's a video file
+      if (['mp4', 'webm', 'avi', 'mov', 'wmv'].includes(extension)) {
+        parts.push({ type: "video", url: url });
+      } else {
+        // It's an image
+        parts.push({ type: "image", url: url });
+      }
+      
+      lastIndex = combinedRegex.lastIndex;
     }
 
     if (lastIndex < text.length) {
@@ -177,6 +196,18 @@ const AIChatScreen = () => {
             alt="Response Visual"
             className="rounded-lg max-w-xs md:max-w-md mb-2"
           />
+        );
+      } else if (part.type === "video") {
+        return (
+          <video
+            key={index}
+            controls
+            className="rounded-lg max-w-xs md:max-w-md mb-2"
+            style={{ maxHeight: "300px" }}
+          >
+            <source src={part.url} type={`video/${part.url.split('.').pop().split('?')[0]}`} />
+            Your browser does not support the video tag.
+          </video>
         );
       }
       return null;

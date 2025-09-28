@@ -91,7 +91,7 @@ export default function ServerTraining() {
         dataField = "bartenderTraining";
       } else if (role === "Host") {
         trainingDocRef = doc(db, "Full Host Training", "data");
-        dataField = "HostTraining";
+        dataField = "hostTraining";
       } else if (role === "Cook") { // Add Cook role support
         trainingDocRef = doc(db, "Full Cook Training", "data");
         dataField = "cookTraining";
