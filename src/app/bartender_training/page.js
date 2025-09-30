@@ -50,6 +50,11 @@ export default function BartenderTrainingPage() {
         router.replace(`/quiz_screen?quiz=${quiz}${urlParams}`);
     };
 
+     const handleSeatingChartClick = () => {
+        const urlParams = currentRole ? `?role=${currentRole}&isManager=${isManagerView}` : '';
+        router.replace(`/menu-memory-game${urlParams}`);
+    };
+
     // **UPDATED CHANGE 4: Data fetching logic jo aapne bataya hai uske mutabiq**
     useEffect(() => {
         const auth = getAuth();
@@ -318,8 +323,28 @@ export default function BartenderTrainingPage() {
                                         <h3 className="text-sm font-bold text-yellow-500">QUIZZES PASSED</h3>
                                         <p className="text-lg font-bold text-gray-800">{completedQuizCount} QUIZZES PASSED</p>
                                     </div>
+                                    
+                                </div>                                
+                            </div>
+
+
+     {/* Games & Challenges Card moved below Gold Medal */}
+                            <div className="bg-white p-6 rounded-3xl shadow-xl">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-4">Challenges</h2>
+                                <div className="space-y-3">
+                                    <button
+                                        onClick={handleSeatingChartClick}
+                                        className="w-full flex items-center justify-between bg-blue-100 text-blue-800 font-medium py-3 px-4 rounded-lg hover:bg-blue-200">
+                                        <div className="flex items-center gap-2">
+                                            <Trophy size={18} />
+                                            Memory
+                                        </div>
+                                        <ChevronRight size={18} />
+                                    </button>
                                 </div>
                             </div>
+
+
                         </div>
                     </div>
                 </div>

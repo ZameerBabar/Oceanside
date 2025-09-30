@@ -73,7 +73,7 @@ export default function ServerTrainingPage() {
 
     const handleSeatingChartClick = () => {
         const urlParams = currentRole ? `?role=${currentRole}&isManager=${isManagerView}` : '';
-        router.replace(`/seating_chat_server${urlParams}`);
+        router.replace(`/menu-memory-game${urlParams}`);
     };
 
     useEffect(() => {
@@ -378,7 +378,7 @@ export default function ServerTrainingPage() {
 
                             {/* Games & Challenges Card moved below Gold Medal */}
                             <div className="bg-white p-6 rounded-3xl shadow-xl">
-                                <h2 className="text-xl font-semibold text-gray-800 mb-4">Seating Chart</h2>
+                                <h2 className="text-xl font-semibold text-gray-800 mb-4">Challenges</h2>
                                 <div className="space-y-3">
                                     <button
                                         onClick={handleSeatingChartClick}
