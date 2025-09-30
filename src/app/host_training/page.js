@@ -241,18 +241,7 @@ export default function HostTrainingPage() {
 
     return (
         <div className="min-h-screen flex flex-col items-center font-sans bg-white relative">
-            {/* CHANGE 6: Manager View Banner add karo */}
-            {isManagerView && currentRole && (
-                <div className="w-full bg-blue-600 text-white p-3 text-center z-20 relative">
-                    <span className="font-semibold">Manager View: Currently viewing Host Training</span>
-                    <button
-                        onClick={() => router.push('/hub?role=' + currentRole + '&isManager=true')}
-                        className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
-                    >
-                        Back to Hub
-                    </button>
-                </div>
-            )}
+        
 
             {/* Top Section with Background Image */}
             <div

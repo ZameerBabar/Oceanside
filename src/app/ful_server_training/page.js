@@ -154,30 +154,14 @@ export default function ServerTraining() {
 
   return (
     <div className="flex h-screen flex-col">
-      {/* CHANGE 5: Manager View Banner */}
-      {isManagerView && currentRole && (
-        <div className="w-full bg-blue-600 text-white p-3 text-center">
-          <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Training Guide</span>
-          <button
-            onClick={() => router.push(`/hub?role=${currentRole}&isManager=true`)}
-            className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
-          >
-            Back to Hub
-          </button>
-        </div>
-      )}
-
+     
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10 overflow-y-auto bg-gradient-to-br from-green-100 to-green-600">
         <div className="bg-white rounded-lg shadow-md p-6 md:p-8 max-w-7xl mx-auto">
           {/* CHANGE 6: Dynamic title with display name */}
           <h1 className="text-3xl font-bold text-green-800 mb-8">
             Oceanside Beach Bar & Grill — {userRole} Training Guide
-            {isManagerView && (
-              <div className="text-lg font-normal text-green-600 mt-2">
-                Viewing as: {displayName}
-              </div>
-            )}
+           
           </h1>
 
           <div className="space-y-8">

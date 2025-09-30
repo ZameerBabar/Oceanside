@@ -243,22 +243,7 @@ export default function HubPage() {
       }}
     >
       <div className="max-w-6xl w-full">
-        {/* Manager View Banner */}
-        {isManagerView && (
-          <div className="bg-blue-600 text-white p-4 rounded-lg mb-6 text-center shadow-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <span className="font-semibold">Manager View: Currently viewing {currentRole} Hub</span>
-              </div>
-              <button
-                onClick={handleBackToTeamHubs}
-                className="bg-white text-blue-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-              >
-                Back to Team Hubs
-              </button>
-            </div>
-          </div>
-        )}
+    
 
         {/* Hub Title aur Description section */}
         <div className="text-center p-8 mb-8 rounded-xl shadow-lg"

@@ -394,29 +394,14 @@ export default function QuizScreen() {
     if (!quizStarted) {
         return (
             <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-green-100 to-green-600 flex items-center justify-center font-inter">
-                {/* CHANGE 7: Manager View Banner for Start Screen */}
-                {isManagerView && currentRole && (
-                    <div className="fixed top-0 left-0 w-full z-50">
-                        <div className="bg-blue-600 text-white p-3 text-center">
-                            <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Quiz {selectedQuiz}</span>
-                            <button
-                                onClick={() => router.push(getBackButtonRoute())}
-                                className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
-                            >
-                                Back to Training
-                            </button>
-                        </div>
-                    </div>
-                )}
+              
 
                 <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden mt-16">
                     <div className="p-8 text-white text-center" style={{ background: 'linear-gradient(135deg, #49a078, #a2cc8e)' }}>
                         <h1 className="text-3xl font-bold mb-2">{userRole} Training Quiz {selectedQuiz}</h1>
                         <p className="text-green-100">Test your knowledge with this interactive quiz</p>
                         {/* Show current user for manager view */}
-                        {isManagerView && (
-                            <p className="text-green-200 mt-2">Viewing as: {displayName}</p>
-                        )}
+                       
                     </div>
                     <div className="p-8">
                         <div className="bg-green-50 p-6 rounded-xl mb-8">
@@ -463,14 +448,7 @@ export default function QuizScreen() {
     // Quiz Question Screen
     return (
         <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-green-100 to-green-600 flex items-center justify-center font-inter">
-            {/* CHANGE 8: Manager View Banner for Question Screen */}
-            {isManagerView && currentRole && (
-                <div className="fixed top-0 left-0 w-full z-50">
-                    <div className="bg-blue-600 text-white p-3 text-center">
-                        <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Quiz {selectedQuiz}</span>
-                    </div>
-                </div>
-            )}
+    
 
             <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden mt-16">
                 {/* Progress Bar */}

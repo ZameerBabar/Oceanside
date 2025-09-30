@@ -232,23 +232,7 @@ export default function ServerTrainingDay1() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-600 p-6 font-inter">
-            {/* CHANGE 5: Manager View Banner */}
-            {isManagerView && currentRole && (
-                <div className="max-w-6xl mx-auto mb-4">
-                    <div className="bg-blue-600 text-white p-3 text-center rounded-t-lg">
-                        <span className="font-semibold">Manager View: {displayName} viewing {currentRole} Training Day {selectedDay}</span>
-                        <button
-                            onClick={() => {
-                                const urlParams = currentRole ? `?role=${currentRole}&isManager=true` : '';
-                                router.push(`/server_training${urlParams}`);
-                            }}
-                            className="ml-4 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold hover:bg-gray-100"
-                        >
-                            Back to Training
-                        </button>
-                    </div>
-                </div>
-            )}
+     
 
             <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
                 {/* Header */}
@@ -256,10 +240,7 @@ export default function ServerTrainingDay1() {
                     <h1 className="text-3xl font-bold">
                         Oceanside Beach Bar & Grill — {userRole} Training Guide (Day {selectedDay})
                     </h1>
-                    {/* CHANGE 6: Show current user in header */}
-                    {isManagerView && (
-                        <p className="text-green-200 mt-2">Viewing as: {displayName}</p>
-                    )}
+                   
                 </div>
 
                 {/* Content */}

@@ -111,14 +111,14 @@ export default function MenuGuide() {
   const allergenOptions =
     activeTab === "Food" ? foodAllergenOptions : drinkAllergenOptions;
 
-  // Filtering logic
+  // Filtering logic with null safety
   const filteredItems = menuItems
     .filter((item) => item.category === activeTab)
     .filter((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+      item.name?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((item) => {
-      // ✅ Filter by selected food category
+      // ✅ Filter by selected food category (with null check)
       if (activeTab === "Food" && appliedCategory) {
         return (
           item.subCategory &&
@@ -130,6 +130,7 @@ export default function MenuGuide() {
     .filter((item) => {
       if (appliedAllergens.length === 0) return true;
 
+      // NULL SAFETY: Check if fields exist before splitting
       const ingredients = item.ingredients
         ? item.ingredients.toLowerCase().split(",").map((ing) => ing.trim())
         : [];
@@ -137,7 +138,6 @@ export default function MenuGuide() {
         ? item.allergens.toLowerCase().split(",").map((a) => a.trim())
         : [];
 
-      // ✅ This is the main change:
       if (activeTab === "Food") {
         // For Food: Hide items with selected allergens
         return !appliedAllergens.some((allergen) => {
@@ -157,7 +157,7 @@ export default function MenuGuide() {
           );
         });
       }
-      return true; // Fallback
+      return true;
     });
 
   // Reset filters when tabs change
