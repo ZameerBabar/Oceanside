@@ -12,6 +12,171 @@ const FirebaseReviewReport = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('Flagler');
   const [availableMonths, setAvailableMonths] = useState([]);
+  
+  // NEW: View mode state (Month or Year)
+  const [viewMode, setViewMode] = useState('Month');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [availableYears, setAvailableYears] = useState([]);
+
+  const aggregateYearData = (monthsData) => {
+    if (!monthsData || monthsData.length === 0) return null;
+
+    const aggregated = {
+      newReviews: { count: 0, change: '' },
+      staffMentions: { count: 0, period: `Year ${selectedYear}` },
+      ratings: [],
+      staffMentionsData: {},
+      notableNegativeReviews: []
+    };
+
+    // Aggregate new reviews
+    monthsData.forEach(monthData => {
+      if (monthData.newReviews?.count) {
+        aggregated.newReviews.count += monthData.newReviews.count;
+      }
+      if (monthData.staffMentions?.count) {
+        aggregated.staffMentions.count += monthData.staffMentions.count;
+      }
+      
+      // Collect all negative reviews
+      if (monthData.notableNegativeReviews) {
+        aggregated.notableNegativeReviews.push(...monthData.notableNegativeReviews);
+      }
+
+      // Aggregate staff mentions
+      if (monthData.staffMentionsData) {
+        monthData.staffMentionsData.forEach(staff => {
+          const key = `${staff.name}-${staff.location}`;
+          if (!aggregated.staffMentionsData[key]) {
+            aggregated.staffMentionsData[key] = {
+              name: staff.name,
+              location: staff.location,
+              positive_mentions: 0,
+              negative_mentions: 0
+            };
+          }
+          aggregated.staffMentionsData[key].positive_mentions += staff.positive_mentions || 0;
+          aggregated.staffMentionsData[key].negative_mentions += staff.negative_mentions || 0;
+        });
+      }
+    });
+
+    // Convert staff mentions object to array and sort
+    aggregated.staffMentionsData = Object.values(aggregated.staffMentionsData)
+      .sort((a, b) => (b.positive_mentions + b.negative_mentions) - (a.positive_mentions + a.negative_mentions))
+      .slice(0, 10);
+
+    // Aggregate ratings by platform and location
+    const ratingsMap = {};
+    monthsData.forEach(monthData => {
+      if (monthData.ratings) {
+        monthData.ratings.forEach(rating => {
+          const key = `${rating.platform}-${rating.location}`;
+          if (!ratingsMap[key]) {
+            ratingsMap[key] = {
+              platform: rating.platform,
+              location: rating.location,
+              breakdown: { '1_stars': 0, '2_stars': 0, '3_stars': 0, '4_stars': 0, '5_stars': 0 },
+              totalRating: 0,
+              totalCount: 0,
+              firstMonthAvg: null,
+              lastMonthAvg: null
+            };
+          }
+          
+          // Aggregate breakdown
+          if (rating.breakdown) {
+            Object.entries(rating.breakdown).forEach(([star, count]) => {
+              ratingsMap[key].breakdown[star] = (ratingsMap[key].breakdown[star] || 0) + count;
+            });
+          }
+
+          // Track first and last month averages for comparison
+          if (ratingsMap[key].firstMonthAvg === null) {
+            ratingsMap[key].firstMonthAvg = rating.average_this_month;
+          }
+          ratingsMap[key].lastMonthAvg = rating.average_this_month;
+        });
+      }
+    });
+
+    // Calculate average ratings for the year
+    aggregated.ratings = Object.values(ratingsMap).map(rating => {
+      const breakdown = rating.breakdown;
+      let totalStars = 0;
+      let totalReviews = 0;
+
+      Object.entries(breakdown).forEach(([star, count]) => {
+        const starValue = parseInt(star.split('_')[0]);
+        totalStars += starValue * count;
+        totalReviews += count;
+      });
+
+      const yearAverage = totalReviews > 0 ? (totalStars / totalReviews).toFixed(1) : 0;
+
+      return {
+        platform: rating.platform,
+        location: rating.location,
+        average_this_month: yearAverage,
+        average_last_month: rating.firstMonthAvg,
+        breakdown: rating.breakdown
+      };
+    });
+
+    // Sort negative reviews by date (most recent first) and limit
+    aggregated.notableNegativeReviews.sort((a, b) => {
+      if (b.date && a.date) return new Date(b.date) - new Date(a.date);
+      return 0;
+    });
+    aggregated.notableNegativeReviews = aggregated.notableNegativeReviews.slice(0, 10);
+
+    return aggregated;
+  };
+
+  const fetchYearData = async (year) => {
+    if (!year) {
+      setLoading(false);
+      return;
+    }
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Get all months for the selected year
+      const yearMonths = availableMonths.filter(month => month.startsWith(year));
+      
+      if (yearMonths.length === 0) {
+        setError(`No data found for year ${year}`);
+        setData(null);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch data for all months in the year
+      const monthsDataPromises = yearMonths.map(async (month) => {
+        const docRef = doc(db, 'reviewReports', month);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? docSnap.data() : null;
+      });
+
+      const monthsData = await Promise.all(monthsDataPromises);
+      const validMonthsData = monthsData.filter(data => data !== null);
+
+      if (validMonthsData.length > 0) {
+        const aggregatedData = aggregateYearData(validMonthsData);
+        setData(aggregatedData);
+      } else {
+        setError(`No valid data found for year ${year}`);
+        setData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching year data:', error);
+      setError('Failed to fetch year data from Firebase');
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchDataFromFirebase = async (month) => {
     if (!month) {
@@ -49,10 +214,18 @@ const FirebaseReviewReport = () => {
       querySnapshot.forEach(doc => {
         months.push(doc.id);
       });
-      months.sort().reverse(); // Sort to get the most recent first
+      months.sort().reverse();
       setAvailableMonths(months);
+      
+      // Extract unique years
+      const years = [...new Set(months.map(month => month.split('-')[0]))].sort().reverse();
+      setAvailableYears(years);
+      
       if (months.length > 0) {
         setSelectedMonth(months[0]);
+        if (years.length > 0) {
+          setSelectedYear(years[0]);
+        }
       } else {
         setError("No data available in Firestore for any month.");
       }
@@ -67,10 +240,12 @@ const FirebaseReviewReport = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedMonth) {
+    if (viewMode === 'Month' && selectedMonth) {
       fetchDataFromFirebase(selectedMonth);
+    } else if (viewMode === 'Year' && selectedYear) {
+      fetchYearData(selectedYear);
     }
-  }, [selectedMonth]);
+  }, [selectedMonth, selectedYear, viewMode]);
 
   const getRatingStars = (rating) => {
     const stars = [];
@@ -142,25 +317,22 @@ const FirebaseReviewReport = () => {
       return (
         <div key={index}>
           <div className="flex items-center justify-between">
-            {/* Left Side: Platform & Location */}
             <div className="flex-1 flex flex-col items-start">
               <div className="flex items-center space-x-2">
                 <span className="font-semibold text-gray-800">{rating.platform}</span>
                 <Pill text={rating.location} color={locationPillColor} />
               </div>
               <div className="flex text-xs text-gray-500 mt-1">
-                <span className="mr-2">Last: {rating.average_last_month || 'N/A'}</span>
-                <span>Now: {rating.average_this_month || 'N/A'}</span>
+                <span className="mr-2">{viewMode === 'Year' ? 'Start' : 'Last'}: {rating.average_last_month || 'N/A'}</span>
+                <span>{viewMode === 'Year' ? 'Avg' : 'Now'}: {rating.average_this_month || 'N/A'}</span>
               </div>
             </div>
-            {/* Center: Now Rating & Trend Icon */}
             <div className="flex-1 flex flex-col items-center">
               <div className="flex items-center space-x-2">
                 <span className="text-xl font-bold text-gray-800">{rating.average_this_month || 'N/A'}</span>
                 {trendIcon}
               </div>
             </div>
-            {/* Right Side: Bar Chart */}
             <div className="flex-none flex items-end justify-end h-16 w-1/3">
               {rating.breakdown && Object.entries(rating.breakdown).length > 0 ? (
                 Object.entries(rating.breakdown).map(([stars, count], barIndex) => {
@@ -209,18 +381,7 @@ const FirebaseReviewReport = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#d4edc9] to-[#34916aff]">
         <div className="bg-white rounded-xl p-8 shadow-lg text-center space-y-4 max-w-md">
           <div className="text-red-500 text-lg font-semibold">{error}</div>
-          <p className="text-gray-600">Please select another month to view data.</p>
-          <select 
-            value={selectedMonth} 
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg border border-gray-300 shadow-sm transition-colors hover:bg-gray-200"
-          >
-            {availableMonths.map((month) => (
-              <option key={month} value={month} className="text-gray-800">
-                {formatMonthLabel(month)}
-              </option>
-            ))}
-          </select>
+          <p className="text-gray-600">Please select another {viewMode.toLowerCase()} to view data.</p>
         </div>
       </div>
     );
@@ -232,7 +393,8 @@ const FirebaseReviewReport = () => {
         <div className="bg-white rounded-xl p-8 shadow-lg text-center space-y-4 max-w-md">
           <Calendar className="h-16 w-16 text-gray-400 mx-auto" />
           <p className="text-gray-600 text-lg">No review report data available</p>
-        <p className="text-sm text-gray-500">Please upload data first using the &quot;Upload Report Data&quot; feature</p></div>
+          <p className="text-sm text-gray-500">Please upload data first using the &quot;Upload Report Data&quot; feature</p>
+        </div>
       </div>
     );
   }
@@ -241,22 +403,61 @@ const FirebaseReviewReport = () => {
     <div className="min-h-screen bg-gradient-to-br from-[#d4edc9] to-[#34916aff]">
       <main className="p-8">
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 bg-gradient-to-br from-[#40cc5cff] to-[#34916aff] p-6 rounded-xl shadow-lg">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 flex-wrap">
             <h1 className="text-3xl md:text-4xl font-extrabold text-white">Review Report</h1>
-            <select 
-              value={selectedMonth} 
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="bg-white/20 text-white px-4 py-2 rounded-full border border-white/30 backdrop-blur-sm"
-            >
-              {availableMonths.map((month) => (
-                <option key={month} value={month} className="text-gray-800">
-                  {formatMonthLabel(month)}
-                </option>
-              ))}
-            </select>
+            
+            {/* VIEW MODE TOGGLE */}
+            <div className="flex items-center bg-white/20 rounded-full p-1 backdrop-blur-sm">
+              <button
+                onClick={() => setViewMode('Month')}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  viewMode === 'Month' 
+                    ? 'bg-white text-[#34916aff]' 
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                Month
+              </button>
+              <button
+                onClick={() => setViewMode('Year')}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  viewMode === 'Year' 
+                    ? 'bg-white text-[#34916aff]' 
+                    : 'text-white hover:bg-white/10'
+                }`}
+              >
+                Year
+              </button>
+            </div>
+
+            {/* CONDITIONAL DROPDOWN */}
+            {viewMode === 'Month' ? (
+              <select 
+                value={selectedMonth} 
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="bg-white/20 text-white px-4 py-2 rounded-full border border-white/30 backdrop-blur-sm"
+              >
+                {availableMonths.map((month) => (
+                  <option key={month} value={month} className="text-gray-800">
+                    {formatMonthLabel(month)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <select 
+                value={selectedYear} 
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="bg-white/20 text-white px-4 py-2 rounded-full border border-white/30 backdrop-blur-sm"
+              >
+                {availableYears.map((year) => (
+                  <option key={year} value={year} className="text-gray-800">
+                    {year}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           <div className="flex flex-wrap items-center space-x-2 space-y-2 md:space-y-0 mt-4 md:mt-0">
-           
             <button className="bg-[#1E4D2B] text-white px-4 py-2 rounded-full flex items-center transition-transform transform hover:scale-105">
               <Download size={18} className="mr-2" /> Download
             </button>
@@ -274,7 +475,7 @@ const FirebaseReviewReport = () => {
             <div className="flex items-center justify-between">
               <span className="text-6xl font-extrabold text-[#194D33]">{data.newReviews?.count || 0}</span>
               <div className="flex items-center text-[#38A169] font-semibold">
-                <span className="text-sm">{data.newReviews?.change || 'No change'}</span>
+                <span className="text-sm">{data.newReviews?.change || (viewMode === 'Year' ? `${selectedYear} Total` : 'No change')}</span>
                 <BarChart2 size={28} className="ml-2" />
               </div>
             </div>
@@ -284,7 +485,7 @@ const FirebaseReviewReport = () => {
             <div className="flex items-center justify-between">
               <span className="text-6xl font-extrabold text-[#194D33]">{data.staffMentions?.count || 0}</span>
               <div className="flex items-center text-gray-500 font-semibold">
-                <span className="text-sm">{data.staffMentions?.period || 'This period'}</span>
+                <span className="text-sm">{data.staffMentions?.period || (viewMode === 'Year' ? `Year ${selectedYear}` : 'This period')}</span>
                 <ChevronDown size={28} className="ml-2" />
               </div>
             </div>
@@ -299,12 +500,7 @@ const FirebaseReviewReport = () => {
               <select 
                 value={selectedLocation} 
                 onChange={(e) => setSelectedLocation(e.target.value)}
-                className="
-                  bg-gray-50 text-gray-700 px-4 py-2 rounded-full border 
-                  border-gray-200 shadow-sm appearance-none cursor-pointer
-                  hover:border-gray-400 transition-colors duration-200
-                  focus:outline-none focus:ring-2 focus:ring-[#34916aff]
-                "
+                className="bg-gray-50 text-gray-700 px-4 py-2 rounded-full border border-gray-200 shadow-sm appearance-none cursor-pointer hover:border-gray-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#34916aff]"
               >
                 <option value="Flagler">Flagler</option>
                 <option value="Ormond">Ormond</option>
@@ -369,7 +565,6 @@ const FirebaseReviewReport = () => {
                         <span className="font-bold text-[#194D33]">{review.reviewer_name}</span>
                         <Pill text={review.platform} color="#1E4D2B" />
                       </div>
-                     
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{review.review_text}</p>
                     <Pill text={review.location} color="#A3C7B5" />

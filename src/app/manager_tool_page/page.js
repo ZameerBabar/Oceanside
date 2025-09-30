@@ -52,7 +52,7 @@ const ManagerToolsPage = () => {
         </svg>
       ),
       onClick: () => {
-        router.push('/manager_dashbaord');
+        router.push('/review_report');
       },
     },
     {
