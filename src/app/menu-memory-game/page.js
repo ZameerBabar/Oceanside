@@ -2,43 +2,52 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
-
-const menuItems = [
-  { 
-    id: 1, 
-    name: "Margherita Pizza", 
-    image: "https://img.freepik.com/premium-photo/italian-pizza-with-tomatoes-mozzarella-cheese-basil_79762-4456.jpg" 
-  },
-  { 
-    id: 2, 
-    name: "Caesar Salad", 
-    image: "https://img.freepik.com/premium-photo/caesar-salad-with-chicken-cheese-croutons_2829-6791.jpg" 
-  },
-  { 
-    id: 3, 
-    name: "Garlic Bread", 
-    image: "https://img.freepik.com/premium-photo/homemade-garlic-bread-with-parsley-wooden-table_114941-258.jpg" 
-  },
-  { 
-    id: 4, 
-    name: "Tiramisu", 
-    image: "https://img.freepik.com/premium-photo/tiramisu-cake-dessert-with-cocoa-powder_741910-2109.jpg" 
-  },
-  { 
-    id: 5, 
-    name: "Pasta Carbonara", 
-    image: "https://img.freepik.com/premium-photo/spaghetti-carbonara-with-bacon-egg-parmesan-cheese-black-pepper_2829-17744.jpg" 
-  },
-];
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 
 export default function MenuMemoryGame() {
   const router = useRouter();
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
   const [userAnswer, setUserAnswer] = useState('');
   const [score, setScore] = useState(0);
   const [gameStatus, setGameStatus] = useState('playing');
   const [feedback, setFeedback] = useState('');
+
+  // Fetch menu items from Firebase
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        setLoading(true);
+        const menuRef = collection(db, 'menuMemoryGame');
+        const querySnapshot = await getDocs(menuRef);
+        
+        const items = [];
+        querySnapshot.forEach((doc) => {
+          items.push({ docId: doc.id, ...doc.data() });
+        });
+
+        // Sort by id if available
+        items.sort((a, b) => (a.id || 0) - (b.id || 0));
+        
+        if (items.length === 0) {
+          console.error('No menu items found in Firebase');
+          alert('No menu items available. Please add items to Firebase.');
+        } else {
+          setMenuItems(items);
+        }
+      } catch (error) {
+        console.error('Error fetching menu items:', error);
+        alert('Failed to load menu items from Firebase');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenuItems();
+  }, []);
 
   useEffect(() => {
     if (timeLeft > 0 && gameStatus === 'playing') {
@@ -87,11 +96,39 @@ export default function MenuMemoryGame() {
     setFeedback('');
   };
 
+  // Loading screen while fetching data
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-green-50">
+        <div className="bg-white p-10 rounded-2xl shadow-xl text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-500 mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600 font-semibold">Loading game data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No items found error
+  if (menuItems.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-green-50">
+        <div className="bg-white p-10 rounded-2xl shadow-xl text-center max-w-md">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">No Menu Items Found</h2>
+          <p className="text-gray-600 mb-6">Please add menu items to Firebase first.</p>
+          <button 
+            onClick={() => router.push('/server_training')}
+            className="bg-gradient-to-r from-green-600 to-green-400 text-white py-3 px-8 rounded-lg hover:shadow-lg transition-all duration-300"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (gameStatus === 'completed') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-green-50,style"
-      
-      >
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-green-50">
         <div className="bg-white p-10 rounded-2xl shadow-xl w-full max-w-2xl text-center border border-gray-100">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Game Complete!</h1>
@@ -143,7 +180,7 @@ export default function MenuMemoryGame() {
                   fill
                   className="object-cover"
                   priority
-                  unoptimized={process.env.NODE_ENV !== 'production'} // Only for development
+                  unoptimized={process.env.NODE_ENV !== 'production'}
                 />
               </div>
             </div>
