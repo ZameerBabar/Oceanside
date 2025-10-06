@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { ChevronDown, BarChart2, Star, Download, Share2, Printer, RefreshCw, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
+import { ChevronDown, BarChart2, Star, Download, Share2, Printer, RefreshCw, Calendar, TrendingUp, TrendingDown, Check } from 'lucide-react';
 
 const FirebaseReviewReport = () => {
   const [data, setData] = useState(null);
@@ -12,6 +12,9 @@ const FirebaseReviewReport = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('Flagler');
   const [availableMonths, setAvailableMonths] = useState([]);
+  const [showCopySuccess, setShowCopySuccess] = useState(false);
+  
+  const reportRef = useRef(null);
   
   // NEW: View mode state (Month or Year)
   const [viewMode, setViewMode] = useState('Month');
@@ -247,6 +250,38 @@ const FirebaseReviewReport = () => {
     }
   }, [selectedMonth, selectedYear, viewMode]);
 
+  // SHARE LINK FUNCTION
+  const handleShare = async () => {
+    const currentUrl = window.location.href;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Review Report - ${viewMode === 'Year' ? selectedYear : formatMonthLabel(selectedMonth)}`,
+          text: 'Check out this review report',
+          url: currentUrl
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(currentUrl);
+        setShowCopySuccess(true);
+        setTimeout(() => setShowCopySuccess(false), 2000);
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        alert('Failed to copy link. Please copy manually: ' + currentUrl);
+      }
+    }
+  };
+
+  // PRINT FUNCTION
+  const handlePrint = () => {
+    window.print();
+  };
+
   const getRatingStars = (rating) => {
     const stars = [];
     for (let i = 0; i < 5; i++) {
@@ -393,7 +428,7 @@ const FirebaseReviewReport = () => {
         <div className="bg-white rounded-xl p-8 shadow-lg text-center space-y-4 max-w-md">
           <Calendar className="h-16 w-16 text-gray-400 mx-auto" />
           <p className="text-gray-600 text-lg">No review report data available</p>
-          <p className="text-sm text-gray-500">Please upload data first using the &quot;Upload Report Data&quot; feature</p>
+          <p className="text-sm text-gray-500">Please upload data first using the "Upload Report Data" feature</p>
         </div>
       </div>
     );
@@ -401,7 +436,7 @@ const FirebaseReviewReport = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#d4edc9] to-[#34916aff]">
-      <main className="p-8">
+      <main className="p-8" ref={reportRef}>
         <header className="flex flex-col md:flex-row justify-between items-center mb-8 bg-gradient-to-br from-[#40cc5cff] to-[#34916aff] p-6 rounded-xl shadow-lg">
           <div className="flex items-center space-x-4 flex-wrap">
             <h1 className="text-3xl md:text-4xl font-extrabold text-white">Review Report</h1>
@@ -458,13 +493,25 @@ const FirebaseReviewReport = () => {
             )}
           </div>
           <div className="flex flex-wrap items-center space-x-2 space-y-2 md:space-y-0 mt-4 md:mt-0">
-            <button className="bg-[#1E4D2B] text-white px-4 py-2 rounded-full flex items-center transition-transform transform hover:scale-105">
-              <Download size={18} className="mr-2" /> Download
+            
+            <button 
+              onClick={handleShare}
+              className="bg-white text-gray-700 px-4 py-2 rounded-full shadow-sm flex items-center transition-colors hover:bg-gray-50 relative"
+            >
+              {showCopySuccess ? (
+                <>
+                  <Check size={18} className="mr-2 text-green-600" /> Copied!
+                </>
+              ) : (
+                <>
+                  <Share2 size={18} className="mr-2" /> Share
+                </>
+              )}
             </button>
-            <button className="bg-white text-gray-700 px-4 py-2 rounded-full shadow-sm flex items-center transition-colors hover:bg-gray-50">
-              <Share2 size={18} className="mr-2" /> Share
-            </button>
-            <button className="bg-white text-gray-700 px-4 py-2 rounded-full shadow-sm flex items-center transition-colors hover:bg-gray-50">
+            <button 
+              onClick={handlePrint}
+              className="bg-white text-gray-700 px-4 py-2 rounded-full shadow-sm flex items-center transition-colors hover:bg-gray-50"
+            >
               <Printer size={18} className="mr-2" /> Print
             </button>
           </div>
@@ -555,26 +602,29 @@ const FirebaseReviewReport = () => {
             </div>
           </Card>
 
-          <Card title="Notable Negative" className="lg:col-span-3">
-            <div className="space-y-4">
-              {data.notableNegativeReviews && data.notableNegativeReviews.length > 0 ? (
-                data.notableNegativeReviews.map((review, index) => (
-                  <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-bold text-[#194D33]">{review.reviewer_name}</span>
-                        <Pill text={review.platform} color="#1E4D2B" />
+          {/* HIDE NOTABLE NEGATIVE IN YEAR VIEW */}
+          {viewMode === 'Month' && (
+            <Card title="Notable Negative" className="lg:col-span-3">
+              <div className="space-y-4">
+                {data.notableNegativeReviews && data.notableNegativeReviews.length > 0 ? (
+                  data.notableNegativeReviews.map((review, index) => (
+                    <div key={index} className="border-b border-gray-200 pb-4 last:border-b-0 last:pb-0">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-[#194D33]">{review.reviewer_name}</span>
+                          <Pill text={review.platform} color="#1E4D2B" />
+                        </div>
                       </div>
+                      <p className="text-sm text-gray-600 mb-2">{review.review_text}</p>
+                      <Pill text={review.location} color="#A3C7B5" />
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{review.review_text}</p>
-                    <Pill text={review.location} color="#A3C7B5" />
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No negative reviews available</p>
-              )}
-            </div>
-          </Card>
+                  ))
+                ) : (
+                  <p className="text-gray-500">No negative reviews available</p>
+                )}
+              </div>
+            </Card>
+          )}
         </div>
       </main>
     </div>

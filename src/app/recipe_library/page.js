@@ -98,7 +98,7 @@ export default function RecipeLibrary() {
       <div className="bg-gradient-to-r from-green-200 via-green-900 to-green-600 text-white border white">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="text-center mb-4">
-            <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-white to-pink-200">
+            <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-white">
               Recipe Library
             </h1>
             <p className="text-sm text-indigo-100 max-w-2xl mx-auto">
@@ -193,7 +193,7 @@ export default function RecipeLibrary() {
                       
                       <button 
                         onClick={() => handleViewRecipe(recipe)}
-                        className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="w-full flex items-center justify-center gap-2 bg-green-600 text-white font-medium py-2.5 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
                       >
                         View procedure
                         <ChevronRight size={16} />
