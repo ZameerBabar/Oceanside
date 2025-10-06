@@ -428,7 +428,7 @@ const FirebaseReviewReport = () => {
         <div className="bg-white rounded-xl p-8 shadow-lg text-center space-y-4 max-w-md">
           <Calendar className="h-16 w-16 text-gray-400 mx-auto" />
           <p className="text-gray-600 text-lg">No review report data available</p>
-          <p className="text-sm text-gray-500">Please upload data first using the "Upload Report Data" feature</p>
+          <p className="text-sm text-gray-500">Please upload data first using the Upload Report Data feature</p>
         </div>
       </div>
     );
