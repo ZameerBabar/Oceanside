@@ -298,7 +298,7 @@ const ShiftNotesSystem = () => {
         {/* Helper message for Manager View debugging */}
         {isManagerView && !userData && !userLoading && (
              <p className="text-red-500 mt-2">
-                 Error: Profile not found in 'managers' or 'users' collection. Check Firestore database setup.
+                 Error: Profile not found. Check Firestore database setup.
              </p>
         )}
       </div>
