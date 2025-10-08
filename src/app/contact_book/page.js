@@ -185,7 +185,7 @@ const App = () => {
                 ) : (
                   <tr>
                     <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
-                      Koi contact nahi mila.
+                     No contacts found.
                     </td>
                   </tr>
                 )}
