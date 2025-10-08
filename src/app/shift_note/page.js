@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Plus, Search, Filter, Edit3, Trash2, MapPin, Clock, User, Tag, Calendar, Eye, Star, TrendingUp, Users, AlertCircle } from 'lucide-react';
