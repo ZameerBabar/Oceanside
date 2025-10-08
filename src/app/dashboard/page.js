@@ -167,7 +167,7 @@ const DashboardPage = () => {
     {
       title: 'Hot Schedules',
       description: 'Check your schedule, request time off, and manage shift swaps—all in one place.',
-      link: 'https://app.hotschedules.com/hs/login.jsp',
+      link: 'https://login.getsling.com/',
       icon: (
         <path
           strokeLinecap="round"
@@ -177,7 +177,7 @@ const DashboardPage = () => {
         />
       ),
       onClick: () => {
-        window.open("https://app.hotschedules.com/hs/login.jsp", "_blank");
+        window.open("https://login.getsling.com/", "_blank");
        
       },
     },

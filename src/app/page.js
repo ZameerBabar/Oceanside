@@ -93,14 +93,15 @@ export default function LoginPage() {
       <div 
         className="relative w-1/2 h-full flex flex-col items-center justify-center text-white text-center"
         style={{ 
-          backgroundImage: `url('/bg.jpg')`, 
+          backgroundImage: `url('/bground.jpg')`, 
           backgroundSize: 'cover',
+           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
         }}
       >
         <div className="absolute inset-0 bg-black opacity-60 z-0"></div>
         <div className="relative z-10 flex flex-col items-center text-center px-4">
-          <Image src="/logo.png" alt="Oceanside Logo" width={150} height={75} className="mb-2" />
+          <Image src="/wlogo.png" alt="Oceanside Logo" width={150} height={75} className="mb-2" />
           <h1 className="text-4xl md:text-5xl mb-4 leading-tight">
             Welcome to <br /> Oceanside <br /> Training Portal
           </h1>

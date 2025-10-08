@@ -236,7 +236,10 @@ export default function ServerTrainingPage() {
             {/* Top Section with Background Image */}
             <div
                 className="w-full h-[500px] bg-cover bg-top"
-                style={{ backgroundImage: 'url(https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FServers.JPG?alt=media&token=cc9f0d9a-dab4-42c0-8d80-8f6c95348820)', backgroundPosition: 'center'  }}
+                style={{ backgroundImage: 'url(https://firebasestorage.googleapis.com/v0/b/oceanside-2e497.firebasestorage.app/o/Team%20and%20Restaurant%20Photos%2FServers.JPG?alt=media&token=cc9f0d9a-dab4-42c0-8d80-8f6c95348820)', backgroundPosition: 'center',
+                     backgroundSize: 'contain',
+                     
+                  }}
             >
                 {/* Dark Overlay for better text readability */}
                 <div className="absolute inset-0 h-[500px] bg-black opacity-60" />
