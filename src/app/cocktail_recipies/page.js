@@ -120,16 +120,16 @@ export default function BartenderHubScreen() {
                     onClick={() => router.push('/server_training')}
                     className="text-[#1E4D2B] hover:text-[#0C2A1A] transition-colors flex items-center"
                 >
-                    <ChevronLeft size={24} />
-                    <span className="ml-1">Back</span>
+              
+                
                 </button>
                 <h1 className="text-3xl font-bold text-white text-center flex-1">Cocktail & Drink Recipes</h1>
                 <div className="w-10"></div>
             </div>
 
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row  lg:items-start gap-6">
                 <div className="w-full md:w-1/3">
-                    <div className="bg-white p-6 rounded-lg shadow-xl overflow-y-auto max-h-[80vh] md:max-h-full">
+                    <div className="bg-white p-6 rounded-lg shadow-xl overflow-y-auto max-h-[108vh] ">
                         <div className="relative mb-6">
                             <input
                                 type="text"
