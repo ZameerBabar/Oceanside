@@ -10,8 +10,9 @@ import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { getSignedMediaURL } from "./firebase-utils"; 
 
 // ----------------------------------------------------
-// 1. Setup Clients (Environment variables jo load ho rahe hain)
+// 1. Setup Clients (Environment variables jo load ho rahe hainee )
 // ----------------------------------------------------
+
 
 // OpenAI key (NEXT_PUBLIC_ prefix wala use kiya gaya hai)
 const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY }); 
