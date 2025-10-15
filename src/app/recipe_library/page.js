@@ -102,7 +102,7 @@ export default function RecipeLibrary() {
               Recipe Library
             </h1>
             <p className="text-sm text-indigo-100 max-w-2xl mx-auto">
-              Discover amazing recipes and master batch cooking techniques
+             Your all-in-one library for every dish on the line. Search, learn, and master Oceanside’s recipes and prep methods.
             </p>
           </div>
           
@@ -143,7 +143,7 @@ export default function RecipeLibrary() {
                 <div className="relative flex-1 w-full">
                   <input
                     type="text"
-                    placeholder="Search for delicious recipes..."
+                    placeholder="Search for recipes..."
                     className="w-full px-4 py-3 pl-12 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all text-gray-700"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -216,6 +216,7 @@ export default function RecipeLibrary() {
           <div>
             {/* Search Bar */}
             <div className="bg-white rounded-2xl shadow-lg p-4 mb-6 border border-gray-100">
+              
               <div className="relative">
                 <input
                   type="text"
@@ -234,9 +235,9 @@ export default function RecipeLibrary() {
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">Loading batch recipes...</h3>
               </div>
             ) : (
-              <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex flex-col lg:flex-row  lg:items-start gap-6">
                 {/* Sidebar with Recipe List */}
-                <div className="w-full lg:w-80 bg-white rounded-xl shadow-lg border border-gray-200 p-4 shrink-0">
+               <div className="w-full lg:w-80 bg-white rounded-xl shadow-lg border border-gray-200 p-4 shrink-0 lg:max-h-[600px] overflow-y-auto">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Batch Recipes</h3>
                   <div className="space-y-2">
                     {filteredBatchRecipes.length > 0 ? (
