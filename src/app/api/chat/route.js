@@ -37,7 +37,7 @@ export async function POST(request) {
         return NextResponse.json({ message: "Invalid JSON body" }, { status: 400 });
     }
 
-    // User se 'query' (question) aur optional 'userId' liya gaya
+    // User se query (question) aur optional 'userId' liya gaya
     const { query, userId } = requestBody; 
     
     if (!query) {
@@ -86,7 +86,7 @@ export async function POST(request) {
                 messages: [
                     {
                         role: "system",
-                        content: `You are an AI assistant for a restaurant's staff, providing ONLY official answers from the provided context. Be concise.`,
+                        content: `You are an AI assistant for a restaurants staff, providing ONLY official answers from the provided context. Be concise.`,
                     },
                     { role: "user", content: `Question: ${query}\n\nContext from Manuals:\n${doc.content}` },
                 ],
