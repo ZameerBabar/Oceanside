@@ -1,6 +1,7 @@
+// AIChatScreen.js (App Router ke liye final updated code)
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const themeColors = {
   darkGreen: "#386641",
@@ -10,137 +11,80 @@ const themeColors = {
   textLight: "#6b7280",
 };
 
-let threadId = "";
-
-// ✅ Ab env variables se key & id le rahe hain
-const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-const assistantId = process.env.NEXT_PUBLIC_ASSISTANT_ID;
-const apiUrl = "https://api.openai.com/v1/threads";
-
+/**
+ * Server-Side API route ko call karega aur JSON response laayega.
+ */
 async function sendMessageToAssistant(userMessage) {
-  try {
-    if (!threadId) {
-      const threadRes = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "OpenAI-Beta": "assistants=v2",
-        },
-      });
-      const threadData = await threadRes.json();
-      threadId = threadData.id;
-    }
+  // Client-side se server-side API route ko call karen
+  // URL /api/chat App Router structure ke mutabiq hai (app/api/chat/route.js)
+  const response = await fetch("/api/chat", { 
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    // NOTE: Yahaan aapko user token bhi bhejna chahiye agar aap Firebase Auth use kar rahe hain
+     body: JSON.stringify({ query: userMessage }),
+  });
 
-    await fetch(`${apiUrl}/${threadId}/messages`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2",
-      },
-      body: JSON.stringify({
-        role: "user",
-        content: [{ type: "text", text: userMessage }],
-      }),
-    });
-
-    const runRes = await fetch(`${apiUrl}/${threadId}/runs`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2",
-      },
-      body: JSON.stringify({ assistant_id: assistantId }),
-    });
-
-    const runData = await runRes.json();
-    const runId = runData.id;
-
-    let status = "queued";
-    while (status !== "completed") {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const statusRes = await fetch(`${apiUrl}/${threadId}/runs/${runId}`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          "OpenAI-Beta": "assistants=v2",
-        },
-      });
-      const statusData = await statusRes.json();
-      status = statusData.status;
-
-      if (["failed", "cancelled", "expired"].includes(status)) {
-        throw new Error("Assistant run failed.");
-      }
-
-      if (status === "requires_action") {
-        throw new Error("Action required, not implemented.");
-      }
-    }
-
-    const messagesRes = await fetch(`${apiUrl}/${threadId}/messages`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "OpenAI-Beta": "assistants=v2",
-      },
-    });
-
-    const messagesData = await messagesRes.json();
-    const assistantMessages = messagesData.data.filter(
-      (msg) => msg.role === "assistant"
-    );
-
-    if (assistantMessages.length > 0) {
-      const latest = assistantMessages[0];
-      const textPart = latest.content.find((c) => c.type === "text");
-      return textPart?.text?.value || "No response";
-    }
-
-    return "No assistant reply";
-  } catch (error) {
-    return `Error: ${error.message}`;
+  // Agar 404 ya 500 error aaya toh exception throw hogi
+  if (!response.ok) {
+    throw new Error(`API call failed with status: ${response.status}`);
   }
-}
 
-function resetThread() {
-  threadId = "";
+  const data = await response.json();
+  return data;
 }
 
 const AIChatScreen = () => {
   const [messages, setMessages] = useState([
-    { sender: "ai", text: "Hi! How can I help you?" },
+    // Ab har message mein attachments aur source fields honge
+    { sender: "ai", text: "Hi! How can I help you?", attachments: [], source: "AI" },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
-    resetThread();
-  }, []);
+    scrollToBottom();
+  }, [messages]);
+
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    const userMessage = { sender: "user", text: input };
+    const userMessageText = input;
+    const userMessage = { sender: "user", text: userMessageText };
+
+    // User message turant add karen
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
     try {
-      const aiResponseText = await sendMessageToAssistant(userMessage.text);
+      // ✅ Server-side API call
+      const serverResponse = await sendMessageToAssistant(userMessageText);
+      
+      // Server se aaya hua naya format use karen
       const botResponse = {
         sender: "ai",
-        text: aiResponseText,
+        text: serverResponse.message,
+        attachments: serverResponse.attachments || [], 
+        source: serverResponse.source || "Unknown Source"
       };
+      
       setMessages((prev) => [...prev, botResponse]);
+      
     } catch (error) {
       console.error("Failed to get AI response:", error);
       const errorResponse = {
         sender: "ai",
-        text: `Not Found. Error: ${error.message}`,
+        text: `Error: Could not connect to the server or API. Please check your keys or server logs. Message: ${error.message}`,
+        attachments: [],
+        source: "Connection Error"
       };
       setMessages((prev) => [...prev, errorResponse]);
     } finally {
@@ -148,70 +92,62 @@ const AIChatScreen = () => {
     }
   };
 
-  const renderMessageContent = (text) => {
-    // Image regex (existing)
-    const imageRegex = /\((https?:\/\/[^\s]+?\.(jpg|jpeg|png|gif)(\?[^\s)]+)?)\)/gi;
-    
-    // Video regex (new) - detects mp4, webm, avi, mov, wmv video files
-    const videoRegex = /\((https?:\/\/[^\s]+?\.(mp4|webm|avi|mov|wmv)(\?[^\s)]+)?)\)/gi;
-    
+  /**
+   * Message content, attachments, aur source ko render karta hai.
+   * @param {object} msg - The message object
+   */
+  const renderMessageContent = (msg) => {
     const parts = [];
-    let lastIndex = 0;
-    let match;
-
-    // Create combined regex to find both images and videos
-    const combinedRegex = /\((https?:\/\/[^\s]+?\.(jpg|jpeg|png|gif|mp4|webm|avi|mov|wmv)(\?[^\s)]+)?)\)/gi;
     
-    while ((match = combinedRegex.exec(text)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push(text.substring(lastIndex, match.index));
-      }
-      
-      const url = match[1];
-      const extension = match[2].toLowerCase();
-      
-      // Check if it's a video file
-      if (['mp4', 'webm', 'avi', 'mov', 'wmv'].includes(extension)) {
-        parts.push({ type: "video", url: url });
-      } else {
-        // It's an image
-        parts.push({ type: "image", url: url });
-      }
-      
-      lastIndex = combinedRegex.lastIndex;
+    // 1. Text Content
+    parts.push(<p key="text" className="mb-1">{msg.text}</p>);
+
+    // 2. Attachments (Images/Videos from Signed URLs)
+    if (msg.attachments && msg.attachments.length > 0) {
+        msg.attachments.forEach((attachment, index) => {
+            if (attachment.type === "image") {
+                parts.push(
+                    <img
+                        key={`img-${index}`}
+                        src={attachment.url}
+                        alt={attachment.fileName || "Attachment Image"}
+                        className="rounded-lg max-w-xs md:max-w-md mb-2 mt-2 border border-gray-200"
+                    />
+                );
+            } else if (attachment.type === "video") {
+                parts.push(
+                    <video
+                        key={`vid-${index}`}
+                        controls
+                        className="rounded-lg max-w-xs md:max-w-md mb-2 mt-2 border border-gray-200"
+                        style={{ maxHeight: "300px" }}
+                    >
+                        <source src={attachment.url} type="video/mp4" /> 
+                        Your browser does not support the video tag.
+                    </video>
+                );
+            }
+        });
     }
 
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
+    // 3. Source (Jawab kahan se aaya hai - Official ya External)
+    if (msg.source) {
+        let sourceColor = themeColors.textLight;
+        if (msg.source.includes("Official")) {
+            sourceColor = msg.sender === "user" ? themeColors.lightGreen : themeColors.darkGreen;
+        } else if (msg.source.includes("External")) {
+            sourceColor = "#ff7f50"; // Coral/Orange for external warning
+        }
+        
+        parts.push(
+            <p key="source" className="text-xs mt-2 font-medium border-t pt-1" 
+               style={{ borderColor: themeColors.lightGreen, color: sourceColor }}>
+                Source: {msg.source}
+            </p>
+        );
     }
 
-    return parts.map((part, index) => {
-      if (typeof part === "string") {
-        return <p key={index}>{part}</p>;
-      } else if (part.type === "image") {
-        return (
-          <img
-            key={index}
-            src={part.url}
-            alt="Response Visual"
-            className="rounded-lg max-w-xs md:max-w-md mb-2"
-          />
-        );
-      } else if (part.type === "video") {
-        return (
-          <video
-            key={index}
-            controls
-            className="rounded-lg max-w-xs md:max-w-md mb-2"
-            style={{ maxHeight: "300px" }}
-          >
-            <source src={part.url} type={`video/${part.url.split('.').pop().split('?')[0]}`} />
-            Your browser does not support the video tag.
-          </video>
-        );
-      }
-      return null;
-    });
+    return parts;
   };
 
   return (
@@ -221,7 +157,7 @@ const AIChatScreen = () => {
     >
       <header className="flex items-center justify-center mb-8">
         <h1 className="text-3xl font-bold" style={{ color: "white" }}>
-          AI Chat
+          AI Chat 🚀
         </h1>
       </header>
 
@@ -249,10 +185,12 @@ const AIChatScreen = () => {
                 color: msg.sender === "user" ? "white" : "#1a1a1a",
               }}
             >
-              {renderMessageContent(msg.text)}
+              {renderMessageContent(msg)} 
             </div>
           </div>
         ))}
+        
+        <div ref={messagesEndRef} />
 
         {isLoading && (
           <div className="flex justify-start">
@@ -300,8 +238,9 @@ const AIChatScreen = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") handleSend();
+            if (e.key === "Enter" && !isLoading) handleSend();
           }}
+          disabled={isLoading}
         />
         <button
           onClick={handleSend}
@@ -310,6 +249,7 @@ const AIChatScreen = () => {
             backgroundColor: themeColors.darkGreen,
             color: themeColors.cardBackground,
           }}
+          disabled={isLoading}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
