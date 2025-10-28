@@ -105,7 +105,7 @@ const ManagerToolsPage = () => {
       ),
     },
     {
-      title: 'Hot Schedules',
+      title: 'GetSling',
       description: 'Review and approve schedules, time-off requests, and shift swaps.',
       link: 'https://login.getsling.com',
       icon: (

@@ -165,7 +165,7 @@ const DashboardPage = () => {
       },
     },
     {
-      title: 'Hot Schedules',
+      title: 'GetSling',
       description: 'Check your schedule, request time off, and manage shift swaps—all in one place.',
       link: 'https://login.getsling.com/',
       icon: (
