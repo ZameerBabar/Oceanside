@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // ✅ Auth state check
+  // ✅ Auth state check (No change needed here)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -54,6 +54,7 @@ export default function LoginPage() {
     return () => unsubscribe();
   }, [router]);
 
+  // ✅ Login Handler (No change needed here)
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -88,14 +89,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-screen font-sans">
-      {/* 🔹 Left Panel */}
+    <div className="flex flex-col md:flex-row min-h-screen font-sans">
+      
+      {/* 🔹 Left Panel (Mobile: Hidden / Desktop: 50% width) */}
       <div 
-        className="relative w-1/2 h-full flex flex-col items-center justify-center text-white text-center"
+        // Mobile par: hidden. Desktop/Tablet par (md:): w-1/2, h-full, flex show.
+        className="hidden md:flex md:w-1/2 md:h-screen relative flex-col items-center justify-center text-white text-center"
         style={{ 
           backgroundImage: `url('/bground.jpg')`, 
           backgroundSize: 'cover',
-           backgroundRepeat: 'no-repeat',
+          backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
         }}
       >
@@ -110,13 +113,16 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* 🔸 Right Panel - Login Box */}
+      {/* 🔸 Right Panel - Login Box (Mobile: Full screen / Desktop: 50% width) */}
       <div 
-        className="w-1/2 h-full flex items-center justify-center"
+        // Mobile par: w-full, flex-grow. Desktop/Tablet par (md:): w-1/2, h-screen
+        className="w-full md:w-1/2 md:h-screen flex items-center justify-center p-4 sm:p-8"
         style={{ background: 'linear-gradient(135deg, #34916aff, #40cc5cff)' }}
       >
-        <div className="bg-white p-10 md:p-12 rounded-[2rem] shadow-xl border border-gray-200 w-full max-w-md">
-          <div className="flex justify-center mb-8">
+        <div className="bg-white p-8 sm:p-10 md:p-12 rounded-[2rem] shadow-xl border border-gray-200 w-full max-w-md">
+          
+          {/* Mobile Logo (Show Logo clearly on mobile when image panel is hidden) */}
+          <div className="flex justify-center mb-8 md:hidden">
             <Image src="/logo.png" alt="Oceanside Logo" width={120} height={60} />
           </div>
 
